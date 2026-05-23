@@ -1,21 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Gift, ShoppingCart, User as UserIcon, LogOut } from "lucide-react";
+import { Gift, ShoppingCart, User as UserIcon, LogOut, ChevronDown } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/store/cart";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { csrfFetch } from "@/lib/csrf-client";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { UserRole } from "@/types/database";
 
 export default function Navbar() {
@@ -25,19 +16,29 @@ export default function Navbar() {
     display_name: string | null;
     role: UserRole;
   } | null>(null);
-  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 서버에서 cookies로 user 검증 — supabase-ssr cookieEncoding 호환성 우회
     fetch("/api/me", { cache: "no-store", credentials: "include" })
       .then((r) => r.json())
       .then((d) => setUser(d.user))
       .catch(() => setUser(null));
   }, []);
 
+  // 외부 클릭 시 메뉴 닫기
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [menuOpen]);
+
   async function logout() {
     await csrfFetch("/api/auth/logout", { method: "POST" });
-    // 풀 페이지 reload로 navbar 포함 모든 상태 초기화
     window.location.href = "/";
   }
 
@@ -105,8 +106,10 @@ export default function Navbar() {
           </Link>
 
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
                 className={buttonVariants({
                   variant: "ghost",
                   size: "sm",
@@ -117,34 +120,64 @@ export default function Navbar() {
                 <span className="max-w-[120px] truncate">
                   {user.display_name || user.email.split("@")[0]}
                 </span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
-                  {user.email}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/mypage")}>
-                  <UserIcon className="mr-2 h-4 w-4" /> 마이페이지 설정
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/cart")}>
-                  내 장바구니
-                </DropdownMenuItem>
-                {(user.role === "seller" || user.role === "admin") && (
-                  <DropdownMenuItem onClick={() => router.push("/seller")}>
-                    셀러 센터
-                  </DropdownMenuItem>
-                )}
-                {user.role === "admin" && (
-                  <DropdownMenuItem onClick={() => router.push("/admin")}>
-                    관리자 페이지
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" /> 로그아웃
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+              </button>
+
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-56 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 z-50"
+                >
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">
+                    {user.email}
+                  </div>
+                  <div className="-mx-1 my-1 h-px bg-border" />
+                  <Link
+                    href="/mypage"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <UserIcon className="h-4 w-4" /> 마이페이지 설정
+                  </Link>
+                  <Link
+                    href="/cart"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    내 장바구니
+                  </Link>
+                  {(user.role === "seller" || user.role === "admin") && (
+                    <Link
+                      href="/seller"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      셀러 센터
+                    </Link>
+                  )}
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      관리자 페이지
+                    </Link>
+                  )}
+                  <div className="-mx-1 my-1 h-px bg-border" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4" /> 로그아웃
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link
