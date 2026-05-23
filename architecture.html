@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SOGRA Tech Stack</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e17;
+    --bg-soft: #131826;
+    --card: #1a2030;
+    --card-hi: #232a3d;
+    --border: #2a3344;
+    --border-hi: #3b4660;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --dim: #64748b;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(244,63,94,.12), transparent 60%),
+      radial-gradient(900px 600px at 90% 10%, rgba(56,189,248,.10), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 36px 18px 80px;
+  }
+  .container { max-width: 1320px; margin: 0 auto; }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid rgba(244,63,94,.4);
+    background: rgba(244,63,94,.08);
+    color: #fda4af; font-size: 12px; font-weight: 600;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 36px; font-weight: 800; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #fb7185, #fbbf24);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; }
+
+  h2 {
+    font-size: 18px; font-weight: 700;
+    margin: 36px 0 14px;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text);
+  }
+  h2 .accent {
+    width: 4px; height: 18px; border-radius: 2px;
+    background: linear-gradient(180deg, #fb7185, #fbbf24);
+  }
+  h2 .small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+
+  /* ============ STACK PYRAMID ============ */
+  .stack {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    margin: 0 auto;
+    max-width: 1080px;
+  }
+  .tier {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 20px;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 18px;
+    align-items: center;
+    position: relative;
+    transition: transform .2s, border-color .2s;
+  }
+  .tier:hover { border-color: var(--border-hi); transform: translateX(2px); }
+  .tier-label {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .tier-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+  }
+  .tier-name { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+  .tier-name small { display: block; font-size: 10px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+  .tier-techs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+
+  .tech {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 600;
+    transition: transform .15s, background .15s;
+    white-space: nowrap;
+  }
+  .tech:hover { background: var(--card-hi); transform: translateY(-1px); }
+  .tech .v {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dim);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .tech .ico { font-size: 13px; line-height: 1; }
+
+  /* tier color accents (left border) */
+  .t-presentation { border-left: 3px solid #fb7185; }
+  .t-ui          { border-left: 3px solid #fbbf24; }
+  .t-state       { border-left: 3px solid #f472b6; }
+  .t-framework   { border-left: 3px solid #38bdf8; }
+  .t-runtime     { border-left: 3px solid #818cf8; }
+  .t-security    { border-left: 3px solid #34d399; }
+  .t-data        { border-left: 3px solid #2dd4bf; }
+  .t-ai          { border-left: 3px solid #a78bfa; }
+  .t-infra       { border-left: 3px solid #94a3b8; }
+  .t-tooling     { border-left: 3px solid #f59e0b; }
+
+  /* ============ CONNECTION DIAGRAM ============ */
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .col {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .col-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .col-head .num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: linear-gradient(135deg, #fb7185, #fbbf24);
+    color: white;
+  }
+  .col-head h3 { font-size: 14px; font-weight: 700; }
+  .col-head small { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+  .pkg {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .pkg:last-child { margin-bottom: 0; }
+  .pkg-name {
+    font-size: 12px; font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .pkg-ver {
+    font-size: 10px; color: var(--dim);
+    background: rgba(255,255,255,.04);
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .pkg-desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  /* ============ FLOW LINE ============ */
+  .pipeline {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    overflow-x: auto;
+  }
+  .pipeline-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 720px;
+  }
+  .p-node {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    flex: 1;
+    text-align: center;
+  }
+  .p-node .ico { font-size: 18px; }
+  .p-node .name { font-size: 12px; font-weight: 700; margin-top: 6px; }
+  .p-node .tech-mini { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: ui-monospace, monospace; }
+  .p-arrow { color: var(--dim); font-size: 18px; flex-shrink: 0; }
+
+  /* version chips */
+  .vers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .vers {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px;
+  }
+  .vers .lname { font-size: 12px; font-weight: 600; }
+  .vers .lver {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    background: rgba(56,189,248,.1);
+    color: #7dd3fc;
+    padding: 3px 8px; border-radius: 5px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 920px) {
+    .flow { grid-template-columns: 1fr; }
+    .tier { grid-template-columns: 1fr; gap: 10px; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">◆ ARGOS · SOGRA Hackathon 2026</div>
+    <h1>Tech Stack Architecture</h1>
+    <p class="subtitle">SOGRA · 로컬 선물 오마카세 · 기술 스택 구조도</p>
+  </header>
+
+  <!-- ============ TIER STACK ============ -->
+  <h2><span class="accent"></span>레이어별 기술 스택 <span class="small">— 위 = 사용자 가까운 쪽</span></h2>
+
+  <div class="stack">
+
+    <!-- Presentation -->
+    <div class="tier t-presentation">
+      <div class="tier-label">
+        <span class="tier-icon">🎨</span>
+        <div class="tier-name">Presentation<small>UI / 스타일링</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">🌬️</span>Tailwind CSS <span class="v">v4</span></span>
+        <span class="tech"><span class="ico">✨</span>tw-animate-css <span class="v">1.4</span></span>
+        <span class="tech"><span class="ico">🎯</span>tailwind-merge <span class="v">3.6</span></span>
+        <span class="tech"><span class="ico">🔧</span>clsx <span class="v">2.1</span></span>
+        <span class="tech"><span class="ico">🍞</span>sonner <span class="v">2.0</span></span>
+        <span class="tech"><span class="ico">🖼️</span>lucide-react <span class="v">1.16</span></span>
+        <span class="tech"><span class="ico">🌗</span>next-themes <span class="v">0.4</span></span>
+      </div>
+    </div>
+
+    <!-- UI Components -->
+    <div class="tier t-ui">
+      <div class="tier-label">
+        <span class="tier-icon">🧩</span>
+        <div class="tier-name">UI Components<small>shadcn/ui</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">📦</span>shadcn <span class="v">4.8</span></span>
+        <span class="tech"><span class="ico">⚛️</span>@base-ui/react <span class="v">1.5</span></span>
+        <span class="tech"><span class="ico">🎭</span>class-variance-authority <span class="v">0.7</span></span>
+        <span class="tech">Button · Card · Dialog · Sheet</span>
+        <span class="tech">Tabs · Table · Select · Avatar</span>
+        <span class="tech">Dropdown · Textarea · Input</span>
+      </div>
+    </div>
+
+    <!-- State -->
+    <div class="tier t-state">
+      <div class="tier-label">
+        <span class="tier-icon">🧠</span>
+        <div class="tier-name">State / Validation<small>Client-side</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">🐻</span>Zustand <span class="v">5.0</span></span>
+        <span class="tech"><span class="ico">✅</span>Zod <span class="v">4.4</span></span>
+        <span class="tech">cart store (localStorage persist)</span>
+      </div>
+    </div>
+
+    <!-- Framework -->
+    <div class="tier t-framework">
+      <div class="tier-label">
+        <span class="tier-icon">⚡</span>
+        <div class="tier-name">Framework<small>풀스택 코어</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">▲</span>Next.js <span class="v">16.2.6 (App Router)</span></span>
+        <span class="tech"><span class="ico">⚛️</span>React <span class="v">19.2.4</span></span>
+        <span class="tech"><span class="ico">⚛️</span>React DOM <span class="v">19.2.4</span></span>
+        <span class="tech">Server Components</span>
+        <span class="tech">Route Handlers</span>
+        <span class="tech">Middleware (Edge)</span>
+        <span class="tech">Server Actions</span>
+      </div>
+    </div>
+
+    <!-- Runtime -->
+    <div class="tier t-runtime">
+      <div class="tier-label">
+        <span class="tier-icon">⚙️</span>
+        <div class="tier-name">Runtime / Language<small>실행 환경</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">📘</span>TypeScript <span class="v">^5</span></span>
+        <span class="tech"><span class="ico">🟢</span>Node.js <span class="v">24 LTS</span></span>
+        <span class="tech"><span class="ico">⚡</span>Vercel Fluid Compute</span>
+        <span class="tech"><span class="ico">🌐</span>Edge Runtime (middleware)</span>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="tier t-security">
+      <div class="tier-label">
+        <span class="tier-icon">🛡️</span>
+        <div class="tier-name">Security<small>7중 가드</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">🧼</span>isomorphic-dompurify <span class="v">3.14</span></span>
+        <span class="tech">CSRF (double-submit)</span>
+        <span class="tech">RBAC (role guard)</span>
+        <span class="tech">SSRF (allowlist)</span>
+        <span class="tech">Upload validator</span>
+        <span class="tech">BruteForce limiter</span>
+        <span class="tech">RLS (Postgres)</span>
+      </div>
+    </div>
+
+    <!-- Data -->
+    <div class="tier t-data">
+      <div class="tier-label">
+        <span class="tier-icon">🗄️</span>
+        <div class="tier-name">Data Layer<small>Supabase</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">⚡</span>@supabase/supabase-js <span class="v">2.106</span></span>
+        <span class="tech"><span class="ico">🔄</span>@supabase/ssr <span class="v">0.10</span></span>
+        <span class="tech"><span class="ico">🐘</span>Postgres + RLS</span>
+        <span class="tech"><span class="ico">🔐</span>Supabase Auth</span>
+        <span class="tech"><span class="ico">📦</span>Supabase Storage</span>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="tier t-ai">
+      <div class="tier-label">
+        <span class="tier-icon">🤖</span>
+        <div class="tier-name">AI Layer<small>Anthropic</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">🧬</span>@anthropic-ai/sdk <span class="v">0.98</span></span>
+        <span class="tech"><span class="ico">🌟</span>Claude Opus 4.7 <span class="v">claude-opus-4-7</span></span>
+        <span class="tech">Tool use · JSON output</span>
+        <span class="tech">GiftSet 큐레이션</span>
+      </div>
+    </div>
+
+    <!-- Infra -->
+    <div class="tier t-infra">
+      <div class="tier-label">
+        <span class="tier-icon">☁️</span>
+        <div class="tier-name">Infra / Hosting<small>배포</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">▲</span>Vercel (Fluid Compute)</span>
+        <span class="tech"><span class="ico">🌍</span>Edge Network · CDN</span>
+        <span class="tech"><span class="ico">🖼️</span>next/image · Unsplash · Pixabay · Supabase</span>
+      </div>
+    </div>
+
+    <!-- Tooling -->
+    <div class="tier t-tooling">
+      <div class="tier-label">
+        <span class="tier-icon">🔧</span>
+        <div class="tier-name">Dev Tooling<small>개발 환경</small></div>
+      </div>
+      <div class="tier-techs">
+        <span class="tech"><span class="ico">📦</span>npm</span>
+        <span class="tech"><span class="ico">🔍</span>ESLint <span class="v">^9</span></span>
+        <span class="tech"><span class="ico">🎨</span>PostCSS</span>
+        <span class="tech"><span class="ico">📘</span>@types/react · @types/node</span>
+        <span class="tech"><span class="ico">⚙️</span>Turbopack (built-in)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ THREE-COLUMN MAP ============ -->
+  <h2><span class="accent"></span>3-Tier 패키지 매핑</h2>
+
+  <div class="flow">
+
+    <div class="col">
+      <div class="col-head">
+        <span class="num">1</span>
+        <div><h3>Client (브라우저)</h3><small>RSC + Client Components</small></div>
+      </div>
+      <div class="pkg"><div class="pkg-name">react <span class="pkg-ver">19.2.4</span></div><div class="pkg-desc">UI 렌더링 (Server + Client Components)</div></div>
+      <div class="pkg"><div class="pkg-name">next <span class="pkg-ver">16.2.6</span></div><div class="pkg-desc">App Router · 라우팅 · 코드 스플리팅</div></div>
+      <div class="pkg"><div class="pkg-name">zustand <span class="pkg-ver">5.0.13</span></div><div class="pkg-desc">전역 cart store · persist 미들웨어</div></div>
+      <div class="pkg"><div class="pkg-name">tailwindcss <span class="pkg-ver">^4</span></div><div class="pkg-desc">유틸리티 우선 스타일링</div></div>
+      <div class="pkg"><div class="pkg-name">@base-ui/react + shadcn <span class="pkg-ver">1.5 / 4.8</span></div><div class="pkg-desc">접근성 보장된 헤드리스 컴포넌트</div></div>
+      <div class="pkg"><div class="pkg-name">zod <span class="pkg-ver">4.4.3</span></div><div class="pkg-desc">폼 + API 입력 스키마 검증</div></div>
+      <div class="pkg"><div class="pkg-name">sonner <span class="pkg-ver">2.0.7</span></div><div class="pkg-desc">Toast 알림</div></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="num">2</span>
+        <div><h3>Server (Next API)</h3><small>Route Handlers · Middleware</small></div>
+      </div>
+      <div class="pkg"><div class="pkg-name">next/server <span class="pkg-ver">16.2.6</span></div><div class="pkg-desc">Route Handlers · NextResponse · cookies()</div></div>
+      <div class="pkg"><div class="pkg-name">@supabase/ssr <span class="pkg-ver">0.10.3</span></div><div class="pkg-desc">서버에서 쿠키 기반 Supabase 세션 관리</div></div>
+      <div class="pkg"><div class="pkg-name">@anthropic-ai/sdk <span class="pkg-ver">0.98.0</span></div><div class="pkg-desc">Claude Opus 4.7 호출 · JSON 응답 파싱</div></div>
+      <div class="pkg"><div class="pkg-name">isomorphic-dompurify <span class="pkg-ver">3.14</span></div><div class="pkg-desc">서버측 XSS sanitize (리뷰/설명)</div></div>
+      <div class="pkg"><div class="pkg-name">zod <span class="pkg-ver">4.4.3</span></div><div class="pkg-desc">Request body 스키마 검증</div></div>
+      <div class="pkg"><div class="pkg-name">lib/security/*</div><div class="pkg-desc">csrf · rbac · ssrf · upload · bruteforce</div></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="num">3</span>
+        <div><h3>External Services</h3><small>Managed / SaaS</small></div>
+      </div>
+      <div class="pkg"><div class="pkg-name">Supabase Postgres</div><div class="pkg-desc">7 테이블 · RLS · GIN index (tags)</div></div>
+      <div class="pkg"><div class="pkg-name">Supabase Auth</div><div class="pkg-desc">이메일/패스워드 · auth.users 트리거</div></div>
+      <div class="pkg"><div class="pkg-name">Supabase Storage</div><div class="pkg-desc">상품 이미지 업로드 버킷</div></div>
+      <div class="pkg"><div class="pkg-name">Anthropic API</div><div class="pkg-desc">claude-opus-4-7 모델</div></div>
+      <div class="pkg"><div class="pkg-name">Vercel</div><div class="pkg-desc">Fluid Compute · CDN · Edge Middleware</div></div>
+      <div class="pkg"><div class="pkg-name">SBA 상가정보 API <span class="pkg-ver">선택</span></div><div class="pkg-desc">소상공인 가게 데이터 (옵션)</div></div>
+    </div>
+  </div>
+
+  <!-- ============ DATA FLOW PIPELINE ============ -->
+  <h2><span class="accent"></span>요청 한 사이클 · 데이터 파이프라인</h2>
+  <div class="pipeline">
+    <div class="pipeline-row">
+      <div class="p-node">
+        <div class="ico">🌐</div>
+        <div class="name">Browser</div>
+        <div class="tech-mini">React 19 · RSC</div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-node">
+        <div class="ico">▲</div>
+        <div class="name">Vercel Edge</div>
+        <div class="tech-mini">middleware.ts</div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-node">
+        <div class="ico">🛡️</div>
+        <div class="name">Security</div>
+        <div class="tech-mini">CSRF · Session · RBAC</div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-node">
+        <div class="ico">⚡</div>
+        <div class="name">Route Handler</div>
+        <div class="tech-mini">Next 16 · Node 24</div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-node">
+        <div class="ico">🗄️</div>
+        <div class="name">Supabase</div>
+        <div class="tech-mini">Postgres + RLS</div>
+      </div>
+      <div class="p-arrow">→</div>
+      <div class="p-node">
+        <div class="ico">🤖</div>
+        <div class="name">Claude API</div>
+        <div class="tech-mini">opus-4-7</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VERSION TABLE ============ -->
+  <h2><span class="accent"></span>주요 패키지 버전 한눈에 보기</h2>
+  <div class="vers-grid">
+    <div class="vers"><span class="lname">next</span><span class="lver">16.2.6</span></div>
+    <div class="vers"><span class="lname">react / react-dom</span><span class="lver">19.2.4</span></div>
+    <div class="vers"><span class="lname">typescript</span><span class="lver">^5</span></div>
+    <div class="vers"><span class="lname">tailwindcss</span><span class="lver">^4</span></div>
+    <div class="vers"><span class="lname">@supabase/supabase-js</span><span class="lver">2.106.1</span></div>
+    <div class="vers"><span class="lname">@supabase/ssr</span><span class="lver">0.10.3</span></div>
+    <div class="vers"><span class="lname">@anthropic-ai/sdk</span><span class="lver">0.98.0</span></div>
+    <div class="vers"><span class="lname">zustand</span><span class="lver">5.0.13</span></div>
+    <div class="vers"><span class="lname">zod</span><span class="lver">4.4.3</span></div>
+    <div class="vers"><span class="lname">@base-ui/react</span><span class="lver">1.5.0</span></div>
+    <div class="vers"><span class="lname">shadcn</span><span class="lver">4.8.0</span></div>
+    <div class="vers"><span class="lname">isomorphic-dompurify</span><span class="lver">3.14.0</span></div>
+    <div class="vers"><span class="lname">sonner</span><span class="lver">2.0.7</span></div>
+    <div class="vers"><span class="lname">lucide-react</span><span class="lver">1.16.0</span></div>
+    <div class="vers"><span class="lname">next-themes</span><span class="lver">0.4.6</span></div>
+    <div class="vers"><span class="lname">eslint</span><span class="lver">^9</span></div>
+  </div>
+
+</div>
+</body>
+</html>
