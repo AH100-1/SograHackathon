@@ -5,6 +5,7 @@ import { verifyCsrf } from "@/lib/security/csrf";
 import { sanitizeHtml, stripHtml } from "@/lib/security/sanitize";
 import { isUrlSafe } from "@/lib/security/ssrf";
 import { requireRole } from "@/lib/security/rbac";
+import { fetchNaverImage } from "@/lib/naver-image";
 import { fetchPexelsImage } from "@/lib/pexels";
 
 export const runtime = "nodejs";
@@ -80,10 +81,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // 이미지 미입력 시 → Pexels 자동 매핑 (실패하면 null)
+  // 이미지 미입력 시 → Naver 한국어 검색 우선, fallback Pexels
   let finalImageUrl = body.image_url || null;
   if (!finalImageUrl) {
-    finalImageUrl = await fetchPexelsImage(body.name, store.category);
+    finalImageUrl =
+      (await fetchNaverImage(body.name, store.category)) ??
+      (await fetchPexelsImage(body.name, store.category));
   }
 
   // 태그 화이트리스트: DB tags 테이블에 정의된 값만 허용
