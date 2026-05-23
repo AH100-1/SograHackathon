@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Gift, ShoppingBag, Store } from "lucide-react";
 import { csrfFetch } from "@/lib/csrf-client";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function SignupForm() {
@@ -34,13 +33,9 @@ export default function SignupForm() {
         toast.error(data.error || "회원가입 실패");
         return;
       }
-      if (data.session) {
-        const sb = createClient();
-        await sb.auth.setSession(data.session);
-      }
       toast.success("환영합니다!");
-      router.push(role === "seller" ? "/seller" : "/");
-      router.refresh();
+      // 풀 페이지 reload — 서버 쿠키 박혀있으니 새 페이지에서 navbar가 자동 인식
+      window.location.href = role === "seller" ? "/seller" : "/";
     } catch (err: any) {
       toast.error(err.message);
     } finally {

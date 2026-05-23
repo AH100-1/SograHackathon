@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Gift } from "lucide-react";
 import { csrfFetch } from "@/lib/csrf-client";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function LoginForm() {
@@ -54,14 +53,9 @@ export default function LoginForm() {
         }
         return;
       }
-      // 서버에서 받은 세션을 클라이언트 supabase에 주입 → onAuthStateChange 발화 → Navbar 갱신
-      if (data.session) {
-        const sb = createClient();
-        await sb.auth.setSession(data.session);
-      }
       toast.success("로그인 되었습니다");
-      router.push(redirectTo);
-      router.refresh();
+      // 풀 페이지 reload — 서버 쿠키 박혀있으니 새 페이지에서 navbar가 자동 인식
+      window.location.href = redirectTo;
     } catch (err: any) {
       const msg = "네트워크 오류가 발생했습니다. 다시 시도해주세요.";
       setErrorMsg(msg);
