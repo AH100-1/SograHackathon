@@ -1,10 +1,17 @@
-// 상품 이미지 — 검증된 Unsplash photo ID 풀 (모두 HTTP 200)
-// 카테고리 풀 + 상품명 키워드 우선 매칭
+// 상품 이미지 — Pexels API로 실제 사진 검색
+// 캐시로 카테고리/키워드 풀 한 번씩만 검색 + 상품 UUID hash로 다양화
+// 병렬 처리 (concurrency 10)
 // 실행: node scripts/update-product-images.mjs
 
 import { createClient } from "@supabase/supabase-js";
 
 process.loadEnvFile(".env.local");
+
+const PEXELS_KEY = process.env.PEXELS_API_KEY;
+if (!PEXELS_KEY) {
+  console.error("PEXELS_API_KEY 누락");
+  process.exit(1);
+}
 
 const sb = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -12,87 +19,46 @@ const sb = createClient(
   { auth: { persistSession: false } },
 );
 
-// 모두 검증된 200 OK photo ID들
-const POOLS = {
-  "전통과자": [
-    "photo-1606312619070-d48b4c652a52",
-    "photo-1558961363-fa8fdf82db35",
-    "photo-1551024506-0bccd828d307",
-  ],
-  "장·반찬": [
-    "photo-1556910103-1c02745aae4d",
-    "photo-1601628828688-632f38a5a7d0",
-    "photo-1611784728558-6c7d9b409cdf",
-  ],
-  "한식": [
-    "photo-1546069901-ba9599a7e63c",
-    "photo-1565299585323-38d6b0865b47",
-    "photo-1604908176997-125f25cc6f3d",
-    "photo-1626804475297-41608ea09aeb",
-    "photo-1532347922424-c652d9b7208e",
-  ],
-  "분식": [
-    "photo-1535473895227-bdecb20fb157",
-    "photo-1546069901-ba9599a7e63c",
-  ],
-  "정육": [
-    "photo-1607623814075-e51df1bdc82f",
-    "photo-1551028719-00167b16eac5",
-    "photo-1588168333986-5078d3ae3976",
-    "photo-1586190848861-99aa4a171e90",
-  ],
-  "수산": [
-    "photo-1565299624946-b28f40a0ae38",
-    "photo-1599487488170-d11ec9c172f0",
-  ],
-  "농산물": [
-    "photo-1542838132-92c53300491e",
-    "photo-1518977676601-b53f82aba655",
-    "photo-1457449940276-e8deed18bfff",
-  ],
-  "전통공예": [
-    "photo-1600857544200-b2f666a9a2ec",
-    "photo-1603565816030-6b389eeb23cb",
-    "photo-1610701596007-11502861dcfa",
-  ],
-  "화훼": [
-    "photo-1487530811176-3780de880c2d",
-    "photo-1490750967868-88aa4486c946",
-    "photo-1531058020387-3be344556be6",
-    "photo-1561181286-d3fee7d55364",
-  ],
-  "특산물": [
-    "photo-1587049352846-4a222e784d38",
-    "photo-1505252585461-04db1eb84625",
-  ],
-  "수제빵": [
-    "photo-1509440159596-0249088772ff",
-    "photo-1567306301408-9b74779a11af",
-    "photo-1608198093002-ad4e005484ec",
-    "photo-1555507036-ab1f4038808a",
-  ],
-  "기타": [
-    "photo-1606312619070-d48b4c652a52",
-    "photo-1558961363-fa8fdf82db35",
-    "photo-1505252585461-04db1eb84625",
-  ],
-};
-
-const KEYWORD_OVERRIDE = [
-  { kw: ["꿀"], id: "photo-1587049352846-4a222e784d38" },
-  { kw: ["떡", "한과", "약과", "강정", "다과"], id: "photo-1606312619070-d48b4c652a52" },
-  { kw: ["김치"], id: "photo-1611784728558-6c7d9b409cdf" },
-  { kw: ["고추장", "장류", "된장"], id: "photo-1601628828688-632f38a5a7d0" },
-  { kw: ["젓갈", "굴젓"], id: "photo-1556910103-1c02745aae4d" },
-  { kw: ["호두", "호두과자"], id: "photo-1558961363-fa8fdf82db35" },
-  { kw: ["인삼", "차"], id: "photo-1576092768241-dec231879fc3" },
-  { kw: ["꽃", "화훼", "다발"], id: "photo-1487530811176-3780de880c2d" },
-  { kw: ["한우", "정육", "소고기"], id: "photo-1607623814075-e51df1bdc82f" },
-  { kw: ["건어물", "오징어", "멸치"], id: "photo-1565299624946-b28f40a0ae38" },
-  { kw: ["딸기", "잼"], id: "photo-1505252585461-04db1eb84625" },
-  { kw: ["빵", "베이커리"], id: "photo-1509440159596-0249088772ff" },
-  { kw: ["과자", "쿠키"], id: "photo-1551024506-0bccd828d307" },
+// 상품명 키워드 → 영어 검색어 (Pexels는 영문 검색이 더 정확)
+const KEYWORD_MAP = [
+  { kw: ["떡", "한과", "약과", "강정", "다과"], q: "korean rice cake" },
+  { kw: ["김치"], q: "korean kimchi" },
+  { kw: ["고추장", "장류", "된장"], q: "korean fermented paste" },
+  { kw: ["젓갈", "굴젓"], q: "korean fermented seafood" },
+  { kw: ["호두", "호두과자"], q: "walnut cookie" },
+  { kw: ["인삼"], q: "ginseng" },
+  { kw: ["차"], q: "korean tea" },
+  { kw: ["막걸리", "양조", "주류"], q: "korean rice wine" },
+  { kw: ["꽃", "화훼", "다발"], q: "flower bouquet" },
+  { kw: ["한우", "정육", "소고기"], q: "korean beef" },
+  { kw: ["건어물", "오징어", "멸치"], q: "dried fish" },
+  { kw: ["딸기", "잼"], q: "strawberry jam" },
+  { kw: ["빵", "베이커리"], q: "artisan bread" },
+  { kw: ["꿀"], q: "honey jar" },
+  { kw: ["과자", "쿠키"], q: "korean cookie" },
+  { kw: ["밤"], q: "roasted chestnut" },
+  { kw: ["반찬"], q: "korean side dishes" },
+  { kw: ["분식"], q: "tteokbokki korean street food" },
+  { kw: ["떡볶이"], q: "tteokbokki" },
+  { kw: ["김밥"], q: "korean gimbap" },
+  { kw: ["만두"], q: "korean dumpling mandu" },
 ];
+
+// 카테고리 fallback 검색어
+const CATEGORY_MAP = {
+  "전통과자": "korean traditional sweets",
+  "장·반찬": "korean side dishes banchan",
+  "한식": "korean food traditional",
+  "분식": "korean street food tteokbokki",
+  "정육": "korean beef hanwoo",
+  "수산": "dried seafood market",
+  "농산물": "fruit basket farm",
+  "전통공예": "korean pottery ceramic",
+  "화훼": "flower bouquet",
+  "특산물": "korean food gift box",
+  "수제빵": "artisan bread bakery",
+  "기타": "korean traditional food",
+};
 
 function hashUuid(uuid) {
   let h = 0;
@@ -100,26 +66,90 @@ function hashUuid(uuid) {
   return Math.abs(h);
 }
 
-function pickImage(product) {
+function getQuery(product) {
   const name = product.name || "";
-  for (const { kw, id } of KEYWORD_OVERRIDE) {
-    if (kw.some((k) => name.includes(k))) return id;
+  for (const { kw, q } of KEYWORD_MAP) {
+    if (kw.some((k) => name.includes(k))) return q;
   }
-  const cat = product.store?.category || "기타";
-  const pool = POOLS[cat] || POOLS["기타"];
-  return pool[hashUuid(product.id) % pool.length];
+  return CATEGORY_MAP[product.store?.category] || CATEGORY_MAP["기타"];
 }
 
-console.log("Unsplash 검증 풀로 이미지 재매핑");
+// Pexels 검색 (쿼리당 15장 풀)
+const cache = new Map();
+async function pexelsSearch(query) {
+  if (cache.has(query)) return cache.get(query);
+  const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=15&orientation=square`;
+  const res = await fetch(url, { headers: { Authorization: PEXELS_KEY } });
+  if (!res.ok) {
+    console.error(`  ❌ Pexels "${query}": HTTP ${res.status}`);
+    cache.set(query, []);
+    return [];
+  }
+  const json = await res.json();
+  const photos = json.photos || [];
+  cache.set(query, photos);
+  return photos;
+}
+
+function pickPhotoUrl(product, photos) {
+  if (!photos.length) return null;
+  const idx = hashUuid(product.id) % photos.length;
+  return photos[idx].src.large; // 940x650 정도. large2x도 가능
+}
+
+// ─────────────────────────────────────────────
+console.log("Pexels 검색으로 상품 이미지 재매핑 (병렬)\n");
+
 const { data: products } = await sb
   .from("products")
   .select("id, name, store:stores(category)");
 
-let done = 0;
-for (const p of products || []) {
-  const url = `https://images.unsplash.com/${pickImage(p)}?w=800&q=80&auto=format&fit=crop`;
-  const { error } = await sb.from("products").update({ image_url: url }).eq("id", p.id);
-  if (!error) done++;
-  if (done % 20 === 0) process.stdout.write(`  ${done}/${products.length}\r`);
+if (!products?.length) {
+  console.error("상품 없음");
+  process.exit(1);
 }
-console.log(`  ${done}/${products.length}\n✅ 완료`);
+
+// 1) 모든 unique 쿼리 한 번씩 미리 검색 (병렬)
+const uniqueQueries = [...new Set(products.map(getQuery))];
+console.log(`unique 검색어 ${uniqueQueries.length}개 병렬 hit...`);
+await Promise.all(uniqueQueries.map(pexelsSearch));
+console.log("검색 풀 준비됨\n");
+
+// 2) 각 상품에 deterministic 매핑 + DB 업데이트 (병렬 batch)
+const CONCURRENCY = 10;
+let done = 0;
+let mapped = 0;
+
+for (let i = 0; i < products.length; i += CONCURRENCY) {
+  const batch = products.slice(i, i + CONCURRENCY);
+  await Promise.all(
+    batch.map(async (p) => {
+      const q = getQuery(p);
+      const photos = cache.get(q) || [];
+      const url = pickPhotoUrl(p, photos);
+      if (!url) {
+        console.log(`  ⚠️  사진 없음: ${p.name} (q="${q}")`);
+        return;
+      }
+      const { error } = await sb
+        .from("products")
+        .update({ image_url: url })
+        .eq("id", p.id);
+      if (error) console.error("  ❌", p.id, error.message);
+      else {
+        done++;
+        mapped++;
+      }
+    }),
+  );
+  process.stdout.write(`  ${done}/${products.length}\r`);
+}
+console.log(`  ${done}/${products.length}\n`);
+
+console.log(`✅ ${mapped}개 상품 이미지 갱신 (검색어 ${uniqueQueries.length}종)`);
+console.log("\n검색어 분포:");
+const distQ = {};
+for (const p of products) distQ[getQuery(p)] = (distQ[getQuery(p)] || 0) + 1;
+for (const [q, n] of Object.entries(distQ).sort((a, b) => b[1] - a[1])) {
+  console.log(`  ${String(n).padStart(3)}x  "${q}"`);
+}
