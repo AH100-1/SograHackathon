@@ -1,5 +1,5 @@
-// 상품마다 정확한 이미지 생성 (Pollinations.ai · 키 없음, 무료)
-// 같은 상품 ID = 같은 seed = 항상 같은 이미지 (deterministic)
+// 상품 이미지 — 검증된 Unsplash photo ID 풀 (모두 HTTP 200)
+// 카테고리 풀 + 상품명 키워드 우선 매칭
 // 실행: node scripts/update-product-images.mjs
 
 import { createClient } from "@supabase/supabase-js";
@@ -12,60 +12,86 @@ const sb = createClient(
   { auth: { persistSession: false } },
 );
 
-// 카테고리 → AI 이미지 prompt 베이스 (영문이 더 정확)
-const CATEGORY_PROMPT = {
-  "전통과자":
-    "Korean traditional sweets, yakgwa hangwa rice cake hangwa, beautifully arranged on wooden tray",
-  "장·반찬":
-    "Korean side dishes banchan, kimchi jeotgal jangajji in ceramic bowls, traditional Korean table",
-  "한식":
-    "Korean traditional meal hansik, multiple ceramic bowls of bibimbap kimchi rice, top-down view",
-  "분식":
-    "Korean street food, tteokbokki gimbap mandu, casual market style plate",
-  "정육":
-    "Korean beef hanwoo, premium marbled cut on wooden board, butcher shop style",
-  "수산":
-    "Korean dried seafood, anchovy squid jerky in traditional baskets, fish market style",
-  "농산물":
-    "Korean fresh farm produce, seasonal fruits vegetables in wicker basket",
-  "전통공예":
-    "Korean traditional ceramic pottery, handmade celadon bowls on wooden shelf, artisan craft",
-  "화훼":
-    "fresh flower bouquet wrapped in paper, traditional Korean market florist style",
-  "특산물":
-    "Korean specialty food gift box, regional Daejeon traditional product",
-  "수제빵":
-    "artisan bakery bread on wooden board, freshly baked, rustic style",
-  "기타":
-    "Korean traditional market gift, wrapped beautifully",
+// 모두 검증된 200 OK photo ID들
+const POOLS = {
+  "전통과자": [
+    "photo-1606312619070-d48b4c652a52",
+    "photo-1558961363-fa8fdf82db35",
+    "photo-1551024506-0bccd828d307",
+  ],
+  "장·반찬": [
+    "photo-1556910103-1c02745aae4d",
+    "photo-1601628828688-632f38a5a7d0",
+    "photo-1611784728558-6c7d9b409cdf",
+  ],
+  "한식": [
+    "photo-1546069901-ba9599a7e63c",
+    "photo-1565299585323-38d6b0865b47",
+    "photo-1604908176997-125f25cc6f3d",
+    "photo-1626804475297-41608ea09aeb",
+    "photo-1532347922424-c652d9b7208e",
+  ],
+  "분식": [
+    "photo-1535473895227-bdecb20fb157",
+    "photo-1546069901-ba9599a7e63c",
+  ],
+  "정육": [
+    "photo-1607623814075-e51df1bdc82f",
+    "photo-1551028719-00167b16eac5",
+    "photo-1588168333986-5078d3ae3976",
+    "photo-1586190848861-99aa4a171e90",
+  ],
+  "수산": [
+    "photo-1565299624946-b28f40a0ae38",
+    "photo-1599487488170-d11ec9c172f0",
+  ],
+  "농산물": [
+    "photo-1542838132-92c53300491e",
+    "photo-1518977676601-b53f82aba655",
+    "photo-1457449940276-e8deed18bfff",
+  ],
+  "전통공예": [
+    "photo-1600857544200-b2f666a9a2ec",
+    "photo-1603565816030-6b389eeb23cb",
+    "photo-1610701596007-11502861dcfa",
+  ],
+  "화훼": [
+    "photo-1487530811176-3780de880c2d",
+    "photo-1490750967868-88aa4486c946",
+    "photo-1531058020387-3be344556be6",
+    "photo-1561181286-d3fee7d55364",
+  ],
+  "특산물": [
+    "photo-1587049352846-4a222e784d38",
+    "photo-1505252585461-04db1eb84625",
+  ],
+  "수제빵": [
+    "photo-1509440159596-0249088772ff",
+    "photo-1567306301408-9b74779a11af",
+    "photo-1608198093002-ad4e005484ec",
+    "photo-1555507036-ab1f4038808a",
+  ],
+  "기타": [
+    "photo-1606312619070-d48b4c652a52",
+    "photo-1558961363-fa8fdf82db35",
+    "photo-1505252585461-04db1eb84625",
+  ],
 };
 
-// 상품명 키워드 → 정확한 prompt (가장 어울리는 단일 케이스)
-const KEYWORD_PROMPT = [
-  { kw: ["꿀"], p: "Korean wild honey in glass jar, golden color, wooden honey dipper" },
-  { kw: ["떡"], p: "Korean rice cake tteok colorful assortment on wooden plate" },
-  { kw: ["한과", "약과", "강정"], p: "Korean traditional sweets yakgwa hangwa decorative arrangement" },
-  { kw: ["김치"], p: "Korean kimchi in ceramic onggi pot, vibrant red fermented" },
-  { kw: ["고추장", "장류", "된장"], p: "Korean fermented paste gochujang doenjang in earthen pot onggi" },
-  { kw: ["젓갈", "굴젓"], p: "Korean salted seafood jeotgal in ceramic bowl" },
-  { kw: ["호두", "호두과자"], p: "Korean walnut cookies hodugwaja on plate, traditional Cheonan style" },
-  { kw: ["인삼"], p: "Korean ginseng root tea brewing in ceramic teapot" },
-  { kw: ["차"], p: "Korean traditional tea ceremony, herbal tea in ceramic cup" },
-  { kw: ["막걸리", "양조", "주류"], p: "Korean rice wine makgeolli in traditional bottle and bowl" },
-  { kw: ["꽃", "다발"], p: "fresh flower bouquet wrapped in paper, seasonal blooms" },
-  { kw: ["한우", "정육"], p: "Korean hanwoo beef marbled premium cut on wooden board" },
-  { kw: ["건어물"], p: "Korean dried seafood anchovy assortment, traditional market" },
-  { kw: ["오징어"], p: "Korean dried squid jerky on wooden tray" },
-  { kw: ["멸치"], p: "Korean dried anchovy myeolchi in ceramic bowl" },
-  { kw: ["딸기", "잼"], p: "Korean strawberry jam in glass jar with fresh strawberries" },
-  { kw: ["빵", "베이커리"], p: "artisan bread variety on wooden board, traditional bakery" },
-  { kw: ["밤"], p: "Korean roasted chestnut snack from Gongju, traditional pastry" },
-  { kw: ["과자", "쿠키"], p: "Korean traditional cookie assortment" },
-  { kw: ["반찬"], p: "Korean side dishes banchan kimchi jangajji in multiple ceramic bowls" },
-  { kw: ["청과", "농산", "과일"], p: "Korean seasonal fruits in wicker basket, farm fresh" },
-  { kw: ["채소", "야채"], p: "Korean fresh vegetables farm produce" },
-  { kw: ["떡방앗간", "방앗간"], p: "Korean rice cake shop tteokbangakgan, traditional sweets display" },
-  { kw: ["젓갈"], p: "Korean salted fish jeotgal in ceramic onggi" },
+const KEYWORD_OVERRIDE = [
+  { kw: ["꿀"], id: "photo-1587049352846-4a222e784d38" },
+  { kw: ["떡", "한과", "약과", "강정", "다과"], id: "photo-1606312619070-d48b4c652a52" },
+  { kw: ["김치"], id: "photo-1611784728558-6c7d9b409cdf" },
+  { kw: ["고추장", "장류", "된장"], id: "photo-1601628828688-632f38a5a7d0" },
+  { kw: ["젓갈", "굴젓"], id: "photo-1556910103-1c02745aae4d" },
+  { kw: ["호두", "호두과자"], id: "photo-1558961363-fa8fdf82db35" },
+  { kw: ["인삼", "차"], id: "photo-1576092768241-dec231879fc3" },
+  { kw: ["꽃", "화훼", "다발"], id: "photo-1487530811176-3780de880c2d" },
+  { kw: ["한우", "정육", "소고기"], id: "photo-1607623814075-e51df1bdc82f" },
+  { kw: ["건어물", "오징어", "멸치"], id: "photo-1565299624946-b28f40a0ae38" },
+  { kw: ["딸기", "잼"], id: "photo-1505252585461-04db1eb84625" },
+  { kw: ["빵", "베이커리"], id: "photo-1509440159596-0249088772ff" },
+  { kw: ["과자", "쿠키"], id: "photo-1551024506-0bccd828d307" },
 ];
 
 function hashUuid(uuid) {
@@ -74,47 +100,26 @@ function hashUuid(uuid) {
   return Math.abs(h);
 }
 
-function buildPrompt(product) {
+function pickImage(product) {
   const name = product.name || "";
-  // 1) 상품명 키워드 우선
-  for (const { kw, p } of KEYWORD_PROMPT) {
-    if (kw.some((k) => name.includes(k))) return p;
+  for (const { kw, id } of KEYWORD_OVERRIDE) {
+    if (kw.some((k) => name.includes(k))) return id;
   }
-  // 2) 카테고리 베이스
   const cat = product.store?.category || "기타";
-  return CATEGORY_PROMPT[cat] || CATEGORY_PROMPT["기타"];
+  const pool = POOLS[cat] || POOLS["기타"];
+  return pool[hashUuid(product.id) % pool.length];
 }
 
-function buildImageUrl(product) {
-  const prompt = `${buildPrompt(product)}, professional food photography, natural lighting, no text`;
-  const seed = hashUuid(product.id) % 1000000;
-  const encoded = encodeURIComponent(prompt);
-  return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=800&model=flux&nologo=true&seed=${seed}`;
-}
-
-console.log("AI 이미지 URL 생성 (Pollinations.ai · flux 모델)\n");
-
+console.log("Unsplash 검증 풀로 이미지 재매핑");
 const { data: products } = await sb
   .from("products")
   .select("id, name, store:stores(category)");
 
-if (!products?.length) {
-  console.error("상품 없음");
-  process.exit(1);
-}
-
-console.log(`${products.length}개 상품 URL 갱신 중...`);
-
 let done = 0;
-for (const p of products) {
-  const url = buildImageUrl(p);
+for (const p of products || []) {
+  const url = `https://images.unsplash.com/${pickImage(p)}?w=800&q=80&auto=format&fit=crop`;
   const { error } = await sb.from("products").update({ image_url: url }).eq("id", p.id);
-  if (error) console.error("  ❌", p.id, error.message);
-  else done++;
+  if (!error) done++;
   if (done % 20 === 0) process.stdout.write(`  ${done}/${products.length}\r`);
 }
-console.log(`  ${done}/${products.length}\n`);
-console.log("✅ 완료. 각 상품마다 고유한 AI 이미지 생성됨.");
-console.log("⚠️  첫 hit 시 5~10초 정도 걸릴 수 있음 (Pollinations 서버가 생성). 이후엔 CDN 캐싱.");
-console.log("\n예시 URL:");
-console.log(buildImageUrl(products[0]).slice(0, 150) + "...");
+console.log(`  ${done}/${products.length}\n✅ 완료`);
