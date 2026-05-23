@@ -13,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Heart, Cake, Gift, HandHeart, Smile, LogIn } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { Sparkles, Heart, Cake, Gift, HandHeart, Smile, LogIn, X } from "lucide-react";
 import { toast } from "sonner";
 
 const targets = [
@@ -45,14 +44,15 @@ export default function RecommendForm() {
   const [occasion, setOccasion] = useState("생일");
   const [preference, setPreference] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
   useEffect(() => {
-    const sb = createClient();
-    sb.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
-    const { data: sub } = sb.auth.onAuthStateChange((_e, session) =>
-      setIsLoggedIn(!!session?.user),
-    );
-    return () => sub.subscription.unsubscribe();
+    // navbar 와 동일하게 /api/me 로 인증 확인 (supabase-ssr cookies 호환성)
+    fetch("/api/me", { cache: "no-store", credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setIsLoggedIn(!!d.user))
+      .catch(() => setIsLoggedIn(false));
   }, []);
 
   function submit() {
@@ -69,21 +69,76 @@ export default function RecommendForm() {
       preference,
     });
 
-    // 미로그인 시 로그인 페이지로 redirect (로그인 후 자동으로 결과 페이지로 진입)
+    const next = `/recommend?${params.toString()}`;
+
+    // 미로그인 → 모달로 안내 후 로그인 페이지로
     if (isLoggedIn === false) {
-      const next = `/recommend?${params.toString()}`;
-      router.push(`/login?redirect=${encodeURIComponent(next)}`);
+      setPendingRedirect(next);
+      setShowLoginModal(true);
       return;
     }
 
     startTransition(() => {
-      router.push(`/recommend?${params.toString()}`);
+      router.push(next);
     });
   }
 
+  function goToLogin() {
+    if (!pendingRedirect) return;
+    router.push(`/login?redirect=${encodeURIComponent(pendingRedirect)}`);
+  }
+
   return (
-    <Card className="border-2 border-primary/20 shadow-xl shadow-primary/5">
-      <div className="px-7 pb-7 pt-2 space-y-6">
+    <>
+      {/* 로그인 안내 모달 */}
+      {showLoginModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setShowLoginModal(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border bg-card p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <button
+              type="button"
+              onClick={() => setShowLoginModal(false)}
+              className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+              aria-label="닫기"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <LogIn className="h-5 w-5" />
+            </div>
+            <h2 className="mt-4 text-lg font-bold tracking-tight">
+              로그인이 필요해요
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              AI에게 한 상을 차려달라고 하려면 먼저 로그인해주세요. 받는 분께
+              꼭 맞는 선물 세트를 추천해드릴게요.
+            </p>
+            <div className="mt-6 flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowLoginModal(false)}
+              >
+                취소
+              </Button>
+              <Button className="flex-1 gap-2" onClick={goToLogin}>
+                <LogIn className="h-4 w-4" />
+                로그인하러 가기
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Card className="border-2 border-primary/20 shadow-xl shadow-primary/5">
+        <div className="px-7 pb-7 pt-2 space-y-6">
         <div>
           <Label className="text-sm font-semibold">예산</Label>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -181,21 +236,17 @@ export default function RecommendForm() {
           size="lg"
           className="w-full gap-2 text-base font-semibold h-12"
           onClick={submit}
-          disabled={isPending}
+          disabled={isPending || isLoggedIn === null}
         >
-          {isLoggedIn === false ? (
-            <>
-              <LogIn className="h-5 w-5" />
-              로그인하고 AI 한 상 받기
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-5 w-5" />
-              {isPending ? "AI가 한 상을 차리는 중…" : "AI에게 한 상 차려달라고 하기"}
-            </>
-          )}
+          <Sparkles className="h-5 w-5" />
+          {isPending
+            ? "AI가 한 상을 차리는 중…"
+            : isLoggedIn === null
+              ? "준비 중…"
+              : "AI에게 한 상 차려달라고 하기"}
         </Button>
       </div>
     </Card>
+    </>
   );
 }
