@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { anthropic, CLAUDE_MODEL } from "@/lib/anthropic";
+import { gemini, GEMINI_MODEL } from "@/lib/gemini";
 import { createClient } from "@/lib/supabase/server";
 import { stripHtml } from "@/lib/security/sanitize";
 import type { GiftSet, Product } from "@/types/database";
@@ -74,8 +74,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ sets: [], reason: "no_products" });
   }
 
-  // Claude 입력용 상품 요약
-  const productsForClaude = productList.map((p) => ({
+  // Gemini 입력용 상품 요약
+  const productsForGemini = productList.map((p) => ({
     id: p.id,
     name: p.name,
     price: p.price,
@@ -94,33 +94,36 @@ export async function POST(req: Request) {
 ${budget.toLocaleString()}원 이하
 
 [선택 가능한 상품 목록 — 이 안에서만 고를 것]
-${JSON.stringify(productsForClaude, null, 2)}
+${JSON.stringify(productsForGemini, null, 2)}
 
 ${SETS_SCHEMA_HINT}
 `;
 
-  let claudeText = "";
+  let geminiText = "";
   try {
-    const resp = await anthropic.messages.create({
-      model: CLAUDE_MODEL,
-      max_tokens: 2000,
-      system:
-        "당신은 한국 대전충청 지역의 로컬 선물 큐레이터입니다. 따뜻하고 진심 어린 톤으로 선물 세트를 추천합니다. 반드시 JSON만 응답합니다.",
-      messages: [{ role: "user", content: userMessage }],
+    const resp = await gemini.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: userMessage,
+      config: {
+        systemInstruction:
+          "당신은 한국 대전충청 지역의 로컬 선물 큐레이터입니다. 따뜻하고 진심 어린 톤으로 선물 세트를 추천합니다. 반드시 JSON만 응답합니다.",
+        responseMimeType: "application/json",
+        temperature: 0.7,
+        maxOutputTokens: 2000,
+      },
     });
-    const block = resp.content[0];
-    if (block.type === "text") claudeText = block.text;
+    geminiText = resp.text ?? "";
   } catch (e: any) {
     return NextResponse.json(
-      { error: "claude_error", message: e.message },
+      { error: "gemini_error", message: e.message },
       { status: 502 },
     );
   }
 
-  // JSON 파싱 (마크다운 코드블록 케이스도 처리)
+  // JSON 파싱 (마크다운 코드블록 케이스도 방어)
   let parsedJson: { sets?: Array<{ title: string; story: string; product_ids: string[] }> };
   try {
-    const cleaned = claudeText
+    const cleaned = geminiText
       .replace(/^```(?:json)?\s*/m, "")
       .replace(/```\s*$/m, "")
       .trim();
@@ -129,7 +132,7 @@ ${SETS_SCHEMA_HINT}
     parsedJson = JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1));
   } catch {
     return NextResponse.json(
-      { error: "parse_error", raw: claudeText.slice(0, 500) },
+      { error: "parse_error", raw: geminiText.slice(0, 500) },
       { status: 502 },
     );
   }
@@ -155,7 +158,7 @@ ${SETS_SCHEMA_HINT}
 
   if (sets.length === 0) {
     return NextResponse.json(
-      { error: "no_valid_sets", raw: claudeText.slice(0, 500) },
+      { error: "no_valid_sets", raw: geminiText.slice(0, 500) },
       { status: 502 },
     );
   }
