@@ -60,7 +60,7 @@ async function Results({
       <div className="rounded-3xl border-2 border-destructive/30 bg-destructive/5 p-10 text-center">
         <AlertTriangle className="mx-auto h-10 w-10 text-destructive" />
         <p className="mt-3 font-bold text-destructive">
-          AI 추천 중 문제가 발생했습니다.
+          꿈돌이 추천 중 문제가 발생했습니다.
         </p>
         <p className="mt-1 text-sm text-bark/70">
           ({error}) — Gemini API 키와 시드 데이터를 확인해주세요.
@@ -140,7 +140,7 @@ export default async function RecommendPage({
           <div className="mt-5">
             <span className="inline-flex items-center gap-2 rounded-full bg-maple-gradient px-3 py-1 text-xs font-bold text-white shadow-maple">
               <Sparkles className="h-3.5 w-3.5" />
-              AI가 골라드린 3가지 한 상
+              꿈돌이가 골라드린 3가지 한 상
             </span>
             <h1 className="mt-4 text-3xl font-extrabold tracking-tight md:text-4xl">
               {search.target || "받는 분"}님께 드릴{" "}

@@ -123,7 +123,7 @@ export default function RecommendForm() {
               로그인이 필요해요
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-bark/75">
-              AI에게 한 상을 차려달라고 하려면 먼저 로그인해주세요. 받는 분께
+              꿈돌이에게 한 상을 차려달라고 하려면 먼저 로그인해주세요. 받는 분께
               꼭 맞는 가을 한 상을 추천해드릴게요.
             </p>
             <div className="mt-6 flex gap-2">
@@ -258,10 +258,10 @@ export default function RecommendForm() {
           >
             <Sparkles className="h-5 w-5" />
             {isPending
-              ? "AI가 한 상을 차리는 중…"
+              ? "꿈돌이가 한 상을 차리는 중…"
               : isLoggedIn === null
               ? "준비 중…"
-              : "AI에게 한 상 차려달라고 하기"}
+              : "꿈돌이에게 한 상 차려달라고 하기"}
           </Button>
         </div>
       </Card>

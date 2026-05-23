@@ -32,7 +32,7 @@ export default function GiftSetCard({
       shadow: "shadow-maple",
       badgeText: "text-white",
       icon: <Award className="h-3.5 w-3.5" />,
-      label: "AI 최고 추천",
+      label: "꿈돌이 최고 추천",
     },
     {
       bg: "bg-[linear-gradient(135deg,#D4621C_0%,#E5A82C_100%)]",

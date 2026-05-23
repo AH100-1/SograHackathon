@@ -72,7 +72,7 @@ export default async function HomePage() {
             <div className="animate-warm-rise">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-maple/30 bg-white/70 px-3 py-1 text-xs font-semibold text-maple shadow-sm backdrop-blur">
                 <Sparkles className="h-3.5 w-3.5" />
-                AI가 차려주는 가을 한 상
+                꿈돌이가 차려주는 가을 한 상
               </span>
               <h1 className="mt-5 text-4xl font-extrabold leading-[1.15] tracking-tight md:text-[56px]">
                 예산만 알려주세요.
@@ -81,12 +81,12 @@ export default async function HomePage() {
                   대전 전통시장 한 상
                 </span>
                 <br />
-                <span className="text-foreground">AI가 차려드려요.</span>
+                <span className="text-foreground">꿈돌이가 차려드려요.</span>
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-bark/80 md:text-lg">
                 카카오 선물하기엔 없는 중앙시장 떡집·태평시장 반찬가게·유성5일장
                 정육점. <br className="hidden md:block" />
-                대전 전통시장 12곳의 가을 정성을 담아 AI가 한 상을 차려드립니다.
+                대전 전통시장 12곳의 가을 정성을 담아 꿈돌이가 한 상을 차려드립니다.
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm">
@@ -95,7 +95,7 @@ export default async function HomePage() {
                   icon={<MapPin className="h-4 w-4" />}
                   label={storeCount > 0 ? `로컬 가게 ${storeCount}곳` : "로컬 가게 준비 중"}
                 />
-                <Pill icon={<Sparkles className="h-4 w-4" />} label="Gemini AI 큐레이션" />
+                <Pill icon={<Sparkles className="h-4 w-4" />} label="꿈돌이 큐레이션" />
               </div>
             </div>
 
@@ -167,7 +167,7 @@ export default async function HomePage() {
               왜 <span className="text-maple">&ldquo;장터한상&rdquo;</span>일까요?
             </h2>
             <p className="mt-3 text-sm text-bark/70 md:text-base">
-              대전 전통시장의 가을 정성을, AI가 한 상으로 차려드립니다.
+              대전 전통시장의 가을 정성을, 꿈돌이가 한 상으로 차려드립니다.
             </p>
           </div>
 
@@ -225,7 +225,7 @@ export default async function HomePage() {
               올 가을, 한 상 가득한 마음을 전해보세요.
             </h2>
             <p className="mt-4 max-w-xl text-white/90 text-sm md:text-base">
-              생일·명절·감사 인사까지. 받는 사람의 자리만 알려주시면 AI가 한 상
+              생일·명절·감사 인사까지. 받는 사람의 자리만 알려주시면 꿈돌이가 한 상
               세 가지를 차려드립니다.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -257,7 +257,7 @@ export default async function HomePage() {
             SOGRA Hackathon 2026 · ARGOS · 충남대학교
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            AI가 차려주는 대전 전통시장 한 상 — 모든 결제는 가상입니다.
+            꿈돌이가 차려주는 대전 전통시장 한 상 — 모든 결제는 가상입니다.
           </p>
         </div>
       </footer>
@@ -267,8 +267,8 @@ export default async function HomePage() {
 
 const features = [
   {
-    title: "AI가 차려주는 한 상",
-    desc: "예산·받는 분·자리만 알려주세요. Gemini AI가 시장 가게를 조합해 세 가지 차림을 골라드립니다.",
+    title: "꿈돌이가 차려주는 한 상",
+    desc: "예산·받는 분·자리만 알려주세요. 꿈돌이가 시장 가게를 조합해 세 가지 차림을 골라드립니다.",
     icon: Sparkles,
   },
   {

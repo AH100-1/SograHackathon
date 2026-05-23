@@ -58,7 +58,7 @@ export default function Navbar({
               장터<span className="text-maple">한상</span>
             </span>
             <span className="text-[10px] text-bark/70 -mt-0.5">
-              AI가 차려주는 대전 시장 한 상
+              꿈돌이가 차려주는 대전 시장 한 상
             </span>
           </div>
         </Link>

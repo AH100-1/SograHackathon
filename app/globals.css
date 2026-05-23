@@ -247,18 +247,19 @@
   .border-maple {
     border-color: var(--maple);
   }
-  /* 살랑 떨어지는 단풍잎 애니메이션 */
+  /* 살랑 떨어지는 단풍잎 애니메이션 — 좌우 sway + 낙하를 단일 keyframes로 통합 */
   @keyframes leaf-fall {
-    0% { transform: translateY(-20%) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.9; }
-    100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
-  }
-  @keyframes leaf-sway {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(20px); }
+    0%   { transform: translate3d(0,    0,    0) rotate(0deg);   opacity: 0; }
+    8%   {                                                          opacity: 0.95; }
+    25%  { transform: translate3d(24px, 22vh, 0) rotate(90deg); }
+    50%  { transform: translate3d(-18px,50vh, 0) rotate(180deg); }
+    75%  { transform: translate3d(28px, 75vh, 0) rotate(270deg); }
+    92%  {                                                          opacity: 0.95; }
+    100% { transform: translate3d(0,    105vh,0) rotate(360deg); opacity: 0; }
   }
   .animate-leaf-fall {
-    animation: leaf-fall 14s linear infinite, leaf-sway 4s ease-in-out infinite;
+    animation: leaf-fall 12s linear infinite;
+    will-change: transform, opacity;
   }
   /* 부드러운 등장 */
   @keyframes warm-rise {

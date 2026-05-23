@@ -12,9 +12,9 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "장터한상 — AI가 차려주는 대전 전통시장 한 상",
+  title: "장터한상 — 꿈돌이가 차려주는 대전 전통시장 한 상",
   description:
-    "예산만 알려주세요. AI가 대전 전통시장 소상공인 상품으로 마음을 담은 한 상을 차려드립니다.",
+    "예산만 알려주세요. 꿈돌이가 대전 전통시장 소상공인 상품으로 마음을 담은 한 상을 차려드립니다.",
 };
 
 async function getCurrentUser(): Promise<NavbarUser | null> {

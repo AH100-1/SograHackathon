@@ -62,7 +62,7 @@ export default function CartPage() {
         </div>
         <h1 className="mt-6 text-2xl font-extrabold">장바구니가 비어있어요</h1>
         <p className="mt-2 text-sm text-bark/70">
-          AI 추천으로 마음에 드는 가을 한 상을 찾아보세요.
+          꿈돌이 추천으로 마음에 드는 가을 한 상을 찾아보세요.
         </p>
         <Link
           href="/"
