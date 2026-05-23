@@ -126,7 +126,7 @@ export default async function ProductDetailPage({
                   </Badge>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  📍 {p.store.address}
+                  {p.store.address}
                 </p>
                 {p.store.description && (
                   <p className="mt-3 text-sm leading-relaxed text-foreground/80">

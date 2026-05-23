@@ -58,7 +58,7 @@ export default function RecommendForm() {
     <Card className="border-2 border-primary/20 shadow-xl shadow-primary/5">
       <div className="px-7 pb-7 pt-2 space-y-6">
         <div>
-          <Label className="text-sm font-semibold">💰 예산</Label>
+          <Label className="text-sm font-semibold">예산</Label>
           <div className="mt-2 flex flex-wrap gap-2">
             {presetBudgets.map((b) => (
               <button
@@ -90,7 +90,7 @@ export default function RecommendForm() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label className="text-sm font-semibold">🎁 받는 사람</Label>
+            <Label className="text-sm font-semibold">받는 사람</Label>
             <Select value={target} onValueChange={(v) => v && setTarget(v)}>
               <SelectTrigger className="mt-2">
                 <SelectValue />
@@ -105,7 +105,7 @@ export default function RecommendForm() {
             </Select>
           </div>
           <div>
-            <Label className="text-sm font-semibold">🎂 어떤 자리인가요</Label>
+            <Label className="text-sm font-semibold">어떤 자리인가요</Label>
             <Select value={occasion} onValueChange={(v) => v && setOccasion(v)}>
               <SelectTrigger className="mt-2">
                 <SelectValue />
@@ -123,7 +123,7 @@ export default function RecommendForm() {
 
         <div>
           <Label className="text-sm font-semibold">
-            🌿 받는 분의 취향 <span className="font-normal text-muted-foreground">(선택)</span>
+            받는 분의 취향 <span className="font-normal text-muted-foreground">(선택)</span>
           </Label>
           <Input
             placeholder="예: 건강 챙기시는 분, 단 거 좋아함, 술 즐김…"
