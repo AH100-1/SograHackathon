@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { Gift, ShoppingCart, User as UserIcon, LogOut } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/store/cart";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { csrfFetch } from "@/lib/csrf-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { UserRole } from "@/types/database";
-import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const count = useCart((s) => s.count());
@@ -25,47 +24,19 @@ export default function Navbar() {
     display_name: string | null;
     role: UserRole;
   } | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
-    const sb = createClient();
-    let mounted = true;
-
-    async function load() {
-      const {
-        data: { user: u },
-      } = await sb.auth.getUser();
-      if (!mounted || !u) {
-        setUser(null);
-        return;
-      }
-      const { data: profile } = await sb
-        .from("users")
-        .select("email, display_name, role")
-        .eq("id", u.id)
-        .single();
-      if (mounted && profile) {
-        setUser({
-          email: profile.email,
-          display_name: profile.display_name,
-          role: profile.role,
-        });
-      }
-    }
-
-    load();
-    const { data: sub } = sb.auth.onAuthStateChange(() => load());
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
+    // 서버에서 cookies로 user 검증 — supabase-ssr cookieEncoding 호환성 우회
+    fetch("/api/me", { cache: "no-store", credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setUser(d.user))
+      .catch(() => setUser(null));
   }, []);
 
   async function logout() {
-    const sb = createClient();
-    await sb.auth.signOut();
-    router.push("/");
-    router.refresh();
+    await csrfFetch("/api/auth/logout", { method: "POST" });
+    // 풀 페이지 reload로 navbar 포함 모든 상태 초기화
+    window.location.href = "/";
   }
 
   return (
