@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { csrfFetch } from "@/lib/csrf-client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ClipboardCheck, CheckCircle2 } from "lucide-react";
 
 type TagGroup = { key: string; label: string; tags: string[] };
 
@@ -24,6 +25,7 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
   const [description, setDescription] = useState("");
   const [groups, setGroups] = useState<TagGroup[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set(["부모님", "건강"]));
+  const [showPendingModal, setShowPendingModal] = useState(false);
 
   useEffect(() => {
     fetch("/api/tags")
@@ -70,13 +72,13 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
         toast.error(data.error || "등록 실패");
         return;
       }
-      toast.success("등록 완료 — 관리자 승인 후 노출됩니다");
       setName("");
       setPrice(10000);
       setStock(50);
       setImageUrl("");
       setSelected(new Set(["부모님", "건강"]));
       setDescription("");
+      setShowPendingModal(true);
       router.refresh();
     } catch (err: any) {
       toast.error(err.message);
@@ -86,6 +88,45 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
   }
 
   return (
+    <>
+      {showPendingModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm p-4"
+          onClick={() => setShowPendingModal(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border bg-card p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+              <ClipboardCheck className="h-6 w-6" />
+            </div>
+            <h2 className="mt-4 text-lg font-bold tracking-tight">
+              상품 점검 중입니다
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              관리자가 등록하신 상품을 검토 중이에요. 검토가 끝나면 자동으로
+              상점에 노출됩니다. 잠시만 기다려 주세요.
+            </p>
+            <div className="mt-5 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                내 상품 목록에서 <span className="font-semibold text-foreground">&apos;승인대기&apos;</span>
+                <span>배지로 확인할 수 있어요.</span>
+              </div>
+            </div>
+            <Button
+              className="mt-6 w-full"
+              onClick={() => setShowPendingModal(false)}
+            >
+              확인
+            </Button>
+          </div>
+        </div>
+      )}
+
     <form onSubmit={submit} className="space-y-3">
       <div>
         <Label className="text-xs">상품 이름</Label>
@@ -192,5 +233,6 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
         {submitting ? "등록 중…" : "상품 등록"}
       </Button>
     </form>
+    </>
   );
 }
