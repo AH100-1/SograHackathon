@@ -5,6 +5,7 @@ import { verifyCsrf } from "@/lib/security/csrf";
 import { sanitizeHtml, stripHtml } from "@/lib/security/sanitize";
 import { isUrlSafe } from "@/lib/security/ssrf";
 import { requireRole } from "@/lib/security/rbac";
+import { fetchPexelsImage } from "@/lib/pexels";
 
 export const runtime = "nodejs";
 
@@ -67,16 +68,22 @@ export async function POST(req: Request) {
 
   const supabase = await createClient();
 
-  // 본인 가게인지 검증 (이중 방어; RLS가 1차 방어)
+  // 본인 가게 검증 + 카테고리(자동 이미지 매핑에 사용)
   const { data: store } = await supabase
     .from("stores")
-    .select("owner_id")
+    .select("owner_id, category")
     .eq("id", body.store_id)
     .single();
 
   if (!store) return NextResponse.json({ error: "store_not_found" }, { status: 404 });
   if (store.owner_id !== auth.userId && auth.role !== "admin") {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
+  // 이미지 미입력 시 → Pexels 자동 매핑 (실패하면 null)
+  let finalImageUrl = body.image_url || null;
+  if (!finalImageUrl) {
+    finalImageUrl = await fetchPexelsImage(body.name, store.category);
   }
 
   // 태그 화이트리스트: DB tags 테이블에 정의된 값만 허용
@@ -102,7 +109,7 @@ export async function POST(req: Request) {
       name: stripHtml(body.name),
       price: body.price,
       stock: body.stock,
-      image_url: body.image_url || null,
+      image_url: finalImageUrl,
       tags: finalTags,
       description: sanitizeHtml(body.description),
       // 시연 편의상 자동 승인. 실제로는 false 로 두고 admin 승인 후 노출
