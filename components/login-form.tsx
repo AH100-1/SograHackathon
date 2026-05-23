@@ -21,10 +21,19 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const ERROR_MESSAGES: Record<string, string> = {
+    invalid_credentials: "이메일 또는 비밀번호가 올바르지 않습니다.",
+    missing_csrf_token: "보안 토큰이 없습니다. 페이지를 새로고침 후 시도해주세요.",
+    csrf_token_mismatch: "보안 토큰이 일치하지 않습니다. 페이지를 새로고침 후 시도해주세요.",
+    invalid_input: "입력값이 올바르지 않습니다.",
+  };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setErrorMsg(null);
     try {
       const res = await csrfFetch("/api/auth/login", {
         method: "POST",
@@ -34,12 +43,14 @@ export default function LoginForm() {
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 429) {
+          const msg = `로그인 시도 횟수 초과. ${data.retryAfterSeconds}초 후 다시 시도해주세요.`;
           setLockedUntil(Date.now() + (data.retryAfterSeconds || 60) * 1000);
-          toast.error(
-            `로그인 시도 횟수 초과. ${data.retryAfterSeconds}초 후 다시 시도해주세요.`,
-          );
+          setErrorMsg(msg);
+          toast.error(msg);
         } else {
-          toast.error(data.error || "로그인 실패");
+          const msg = ERROR_MESSAGES[data.error] || "로그인에 실패했습니다.";
+          setErrorMsg(msg);
+          toast.error(msg);
         }
         return;
       }
@@ -52,7 +63,9 @@ export default function LoginForm() {
       router.push(redirectTo);
       router.refresh();
     } catch (err: any) {
-      toast.error(err.message);
+      const msg = "네트워크 오류가 발생했습니다. 다시 시도해주세요.";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -96,6 +109,12 @@ export default function LoginForm() {
             className="mt-1.5"
           />
         </div>
+
+        {errorMsg && (
+          <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {errorMsg}
+          </p>
+        )}
 
         <Button type="submit" className="w-full" disabled={submitting || !!lockedUntil}>
           {submitting ? "로그인 중…" : "로그인"}
