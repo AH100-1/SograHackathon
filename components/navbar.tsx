@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/store/cart";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { csrfFetch } from "@/lib/csrf-client";
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ export default function Navbar() {
     display_name: string | null;
     role: UserRole;
   } | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // 서버에서 cookies로 user 검증 — supabase-ssr cookieEncoding 호환성 우회
@@ -121,17 +123,17 @@ export default function Navbar() {
                   {user.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/cart">내 장바구니</Link>
+                <DropdownMenuItem onClick={() => router.push("/cart")}>
+                  내 장바구니
                 </DropdownMenuItem>
                 {(user.role === "seller" || user.role === "admin") && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/seller">셀러 센터</Link>
+                  <DropdownMenuItem onClick={() => router.push("/seller")}>
+                    셀러 센터
                   </DropdownMenuItem>
                 )}
                 {user.role === "admin" && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin">관리자 페이지</Link>
+                  <DropdownMenuItem onClick={() => router.push("/admin")}>
+                    관리자 페이지
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
