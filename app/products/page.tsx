@@ -16,9 +16,9 @@ export default async function ProductsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-3xl font-extrabold tracking-tight">전체 로컬 상품</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">대전 전통시장 상품</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        대전충청 소상공인이 직접 등록한 상품 {products.length}개
+        대전 전통시장 가게가 차려낸 상품 {products.length}개
       </p>
       <div className="mt-8 grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((p) => (

@@ -141,7 +141,7 @@ export default function RecommendForm() {
           disabled={isPending}
         >
           <Sparkles className="h-5 w-5" />
-          {isPending ? "AI 가 고르는 중…" : "AI 선물 세트 추천받기"}
+          {isPending ? "AI가 한 상을 차리는 중…" : "AI에게 한 상 차려달라고 하기"}
         </Button>
       </div>
     </Card>

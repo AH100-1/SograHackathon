@@ -19,48 +19,51 @@ const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
 });
 
-// 충남·대전 주요 좌표
+// 대전 전통시장 좌표 (모두 대전광역시 내)
 const SPOTS = [
-  { name: "대전 시청",   cx: 127.3845, cy: 36.3504, r: 1000 },
-  { name: "대전 은행동", cx: 127.4275, cy: 36.3286, r: 800 },
-  { name: "천안 시청",   cx: 127.1471, cy: 36.8151, r: 1000 },
-  { name: "공주 원도심", cx: 127.1192, cy: 36.4467, r: 1000 },
-  { name: "논산 시청",   cx: 127.0985, cy: 36.1872, r: 1000 },
-  { name: "보령 시청",   cx: 126.6128, cy: 36.3334, r: 1000 },
-  { name: "부여 부소산", cx: 126.9097, cy: 36.2756, r: 1000 },
-  { name: "서산 시청",   cx: 126.4502, cy: 36.7822, r: 1000 },
-  { name: "당진 시청",   cx: 126.6457, cy: 36.8939, r: 1000 },
-  { name: "아산 온양",   cx: 127.0046, cy: 36.7900, r: 1000 },
+  { name: "중앙시장",       cx: 127.43250, cy: 36.32944, r: 700 },
+  { name: "태평시장",       cx: 127.39134, cy: 36.31976, r: 600 },
+  { name: "유성5일장",      cx: 127.34036, cy: 36.35457, r: 600 },
+  { name: "한민시장",       cx: 127.37960, cy: 36.34870, r: 500 },
+  { name: "인동시장",       cx: 127.44030, cy: 36.33010, r: 500 },
+  { name: "신도꼼지락시장", cx: 127.42160, cy: 36.37290, r: 500 },
+  { name: "도마큰시장",     cx: 127.36770, cy: 36.32710, r: 500 },
+  { name: "문창시장",       cx: 127.42180, cy: 36.32010, r: 500 },
+  { name: "법동시장",       cx: 127.42520, cy: 36.37120, r: 500 },
+  { name: "오류동시장",     cx: 127.41800, cy: 36.33310, r: 500 },
+  { name: "자양시장",       cx: 127.43760, cy: 36.36340, r: 500 },
+  { name: "우암시장",       cx: 127.43400, cy: 36.34380, r: 500 },
 ];
 
-// 명백히 선물용 아닌 업종 제외
-const EXCLUDE_KEYWORDS = [
+// 전통시장 가게답지 않은 업종 제외
+const NEGATIVE = [
+  "카페", "커피", "비알코올",
+  "일식", "중식", "양식", "아시아", "이태리", "이탈", "프렌치",
+  "치킨", "피자", "햄버거", "패스트", "패밀리",
   "주점", "유흥", "단란",
   "주유소", "세차", "자동차", "타이어", "부동산",
   "이미용", "이용", "미용", "마사지", "헬스", "노래", "PC방", "당구",
   "은행", "증권", "보험", "병원", "의원", "약국",
   "학원", "교습소", "독서실", "어린이집",
-  "법무", "회계", "컨설팅", "부동산",
+  "법무", "회계", "컨설팅",
 ];
 
-// 선물 후보로 포함할 중분류 키워드 (소매 대분류 안에서만)
-const RETAIL_GIFT_PATTERNS = /음식|식품|농산|특산|기념|공예|차|화훼/;
+// 전통시장 분위기 가게만 통과 (대·중·소분류 어디든 포함)
+const POSITIVE = [
+  "한식", "향토", "한정식",
+  "분식", "기타 간이", "김밥", "만두", "떡", "한과", "강정", "약과", "전",
+  "김치", "반찬", "장류", "젓갈", "절임",
+  "농산", "청과", "수산", "정육", "축산", "건어물", "곡물",
+  "특산", "음식료", "식료품",
+  "제과", "제빵", "베이커리",
+  "공예", "도자", "한복", "자수", "수예", "전통",
+  "꽃", "화훼",
+];
 
 function shouldInclude(item) {
-  const lcls = item.indsLclsNm || "";   // 대분류 (음식 / 소매 / 수리·개인 / ...)
-  const mcls = item.indsMclsNm || "";   // 중분류 (한식 / 카페 / ...)
-  const scls = item.indsSclsNm || "";   // 소분류
-  const full = `${lcls} ${mcls} ${scls}`;
-
-  if (EXCLUDE_KEYWORDS.some((k) => full.includes(k))) return false;
-
-  // 음식 대분류 → 한식, 일식, 카페, 제과, 떡 등 모두 포함
-  if (lcls === "음식") return true;
-
-  // 소매 대분류 → 식품·특산·공예·차 관련만
-  if (lcls === "소매" && RETAIL_GIFT_PATTERNS.test(mcls + scls)) return true;
-
-  return false;
+  const full = `${item.indsLclsNm || ""} ${item.indsMclsNm || ""} ${item.indsSclsNm || ""}`;
+  if (NEGATIVE.some((k) => full.includes(k))) return false;
+  return POSITIVE.some((k) => full.includes(k));
 }
 
 async function fetchRadius(spot) {
@@ -85,42 +88,54 @@ async function fetchRadius(spot) {
 }
 
 function categoryOf(item) {
-  const m = item.indsMclsNm || "";
-  const s = item.indsSclsNm || "";
-  const full = m + s;
-  if (/제과|제빵|떡|한과/.test(full)) return "식품·과자";
-  if (/한식|향토/.test(full)) return "식품·한식";
-  if (/카페|커피|비알코올|차/.test(full)) return "음료·카페";
-  if (/일식|중식|양식|아시아/.test(full)) return "식품·외식";
-  if (/농산|특산/.test(full)) return "식품·특산";
-  if (/공예|도자|화훼/.test(full)) return "공예";
-  if (/음식|식품/.test(full)) return "식품·기타";
-  return "식품·기타";
+  const full = `${item.indsMclsNm || ""} ${item.indsSclsNm || ""}`;
+  if (/떡|한과|강정|약과/.test(full)) return "전통과자";
+  if (/제과|제빵|베이커리/.test(full)) return "수제빵";
+  if (/김치|반찬|장류|젓갈|절임/.test(full)) return "장·반찬";
+  if (/한식|향토|한정식/.test(full)) return "한식";
+  if (/분식|김밥|만두|간이/.test(full)) return "분식";
+  if (/정육|축산/.test(full)) return "정육";
+  if (/수산|건어물/.test(full)) return "수산";
+  if (/청과|농산|곡물/.test(full)) return "농산물";
+  if (/공예|도자|한복|자수|수예/.test(full)) return "전통공예";
+  if (/꽃|화훼/.test(full)) return "화훼";
+  if (/특산|식료품|음식료/.test(full)) return "특산물";
+  return "기타";
 }
 
 
 function priceOf(category) {
   const ranges = {
-    "식품·한식":  [15000, 45000],
-    "식품·과자":  [8000,  25000],
-    "음료·카페":  [12000, 35000],
-    "식품·외식":  [20000, 60000],
-    "식품·특산":  [10000, 30000],
-    "공예":        [15000, 50000],
-    "식품·기타":  [8000,  22000],
+    "전통과자": [8000,  25000],
+    "수제빵":    [7000,  18000],
+    "장·반찬":  [10000, 30000],
+    "한식":      [15000, 40000],
+    "분식":      [6000,  15000],
+    "정육":      [20000, 60000],
+    "수산":      [15000, 50000],
+    "농산물":    [10000, 30000],
+    "전통공예":  [15000, 60000],
+    "화훼":      [12000, 35000],
+    "특산물":    [12000, 35000],
+    "기타":      [8000,  22000],
   };
   const [lo, hi] = ranges[category] || [10000, 25000];
   return Math.round((lo + Math.random() * (hi - lo)) / 1000) * 1000;
 }
 
 const IMAGE_POOL = {
-  "식품·한식":  ["photo-1583224994076-ae9c4bb0e8e3", "photo-1604908554007-1aaf3e51b8d2"],
-  "식품·과자":  ["photo-1558961363-fa8fdf82db35", "photo-1606312619070-d48b4c652a52", "photo-1605478371310-89f481d23080"],
-  "음료·카페":  ["photo-1495474472287-4d71bcdd2085", "photo-1509042239860-f550ce710b93", "photo-1576092768241-dec231879fc3"],
-  "식품·외식":  ["photo-1546069901-ba9599a7e63c", "photo-1565299624946-b28f40a0ae38"],
-  "식품·특산":  ["photo-1597528380177-f23ea0bdb18b", "photo-1556910103-1c02745aae4d"],
-  "공예":        ["photo-1600857544200-b2f666a9a2ec", "photo-1605478371310-89f481d23080"],
-  "식품·기타":  ["photo-1606312619070-d48b4c652a52", "photo-1558961363-fa8fdf82db35"],
+  "전통과자": ["photo-1558961363-fa8fdf82db35", "photo-1606312619070-d48b4c652a52", "photo-1605478371310-89f481d23080"],
+  "수제빵":    ["photo-1509440159596-0249088772ff", "photo-1567306301408-9b74779a11af"],
+  "장·반찬":  ["photo-1604908554007-1aaf3e51b8d2", "photo-1556910103-1c02745aae4d"],
+  "한식":      ["photo-1583224994076-ae9c4bb0e8e3", "photo-1546069901-ba9599a7e63c"],
+  "분식":      ["photo-1535473895227-bdecb20fb157", "photo-1546069901-ba9599a7e63c"],
+  "정육":      ["photo-1607623814075-e51df1bdc82f", "photo-1551028719-00167b16eac5"],
+  "수산":      ["photo-1565299624946-b28f40a0ae38", "photo-1559737558-2f5a35f4523d"],
+  "농산물":    ["photo-1542838132-92c53300491e", "photo-1518977676601-b53f82aba655"],
+  "전통공예":  ["photo-1600857544200-b2f666a9a2ec", "photo-1605478371310-89f481d23080"],
+  "화훼":      ["photo-1487530811176-3780de880c2d", "photo-1490750967868-88aa4486c946"],
+  "특산물":    ["photo-1597528380177-f23ea0bdb18b", "photo-1587049352846-4a222e784d38"],
+  "기타":      ["photo-1606312619070-d48b4c652a52", "photo-1558961363-fa8fdf82db35"],
 };
 function imageOf(category) {
   const pool = IMAGE_POOL[category] || IMAGE_POOL["식품·기타"];
@@ -130,40 +145,58 @@ function imageOf(category) {
 
 function productNameOf(storeName, category) {
   const suffix = {
-    "식품·한식":  "한식 도시락 세트",
-    "식품·과자":  "수제 과자 선물 세트",
-    "음료·카페":  "원두 & 핸드드립 세트",
-    "식품·외식":  "시그니처 디시 식권",
-    "식품·특산":  "지역 특산 선물 박스",
-    "공예":        "장인 공예 컬렉션",
-    "식품·기타":  "시그니처 선물 박스",
+    "전통과자": "수제 한과 선물 세트",
+    "수제빵":    "이른 아침 수제빵 박스",
+    "장·반찬":  "엄마손 반찬 선물 세트",
+    "한식":      "정성 한식 패키지",
+    "분식":      "시장표 분식 콤보",
+    "정육":      "프리미엄 한우 선물 세트",
+    "수산":      "건어물·젓갈 모듬",
+    "농산물":    "제철 농산물 박스",
+    "전통공예":  "장인의 수제 공예품",
+    "화훼":      "꽃과 함께하는 마음 한 다발",
+    "특산물":    "대전 특산 선물 박스",
+    "기타":      "전통시장 시그니처 박스",
   };
   return `${storeName} ${suffix[category] || "선물 세트"}`;
 }
 
 function tagsOf(_item, category) {
-  const base = ["대전충청", "로컬"];
-  if (category === "식품·한식")  base.push("전통", "부모님", "명절");
-  if (category === "식품·과자")  base.push("간식", "달달함", "선물");
-  if (category === "음료·카페")  base.push("카페", "원두", "친구");
-  if (category === "식품·외식")  base.push("식사", "기념일", "외식");
-  if (category === "식품·특산")  base.push("전통", "특산물", "명절");
-  if (category === "공예")        base.push("공예", "기념일", "수제");
-  return [...new Set(base)];
+  const base = ["대전", "전통시장", "로컬"];
+  const extra = {
+    "전통과자": ["전통", "부모님", "명절", "달달함"],
+    "수제빵":    ["수제", "간식", "친구"],
+    "장·반찬":  ["반찬", "엄마손", "부모님", "전통"],
+    "한식":      ["한식", "부모님", "명절", "정성"],
+    "분식":      ["간식", "친구", "추억"],
+    "정육":      ["한우", "명절", "부모님"],
+    "수산":      ["젓갈", "건어물", "부모님", "전통"],
+    "농산물":    ["제철", "건강", "부모님"],
+    "전통공예":  ["공예", "수제", "기념일"],
+    "화훼":      ["꽃", "기념일", "연인"],
+    "특산물":    ["특산", "전통", "명절"],
+    "기타":      ["시장", "정성"],
+  };
+  return [...new Set([...base, ...(extra[category] || [])])];
 }
 
 function descOf(storeName, category, addr) {
-  const region = addr.split(" ").slice(0, 2).join(" ");
+  const region = addr.split(" ").slice(0, 3).join(" ");
   const lines = {
-    "식품·한식":  `${region}의 ${storeName}이 정성껏 차려낸 한식 도시락. 부모님·명절 선물에 추천.`,
-    "식품·과자":  `${storeName}에서 손수 만든 전통 과자. 갓 구워낸 식감과 자연 단맛.`,
-    "음료·카페":  `${storeName} 바리스타가 직접 로스팅한 원두와 핸드드립 도구 세트.`,
-    "식품·외식":  `${region}의 ${storeName}에서 사용 가능한 시그니처 메뉴 식권.`,
-    "식품·특산":  `${region}에서 자란 농산물로 만든 ${storeName}의 시그니처 특산품.`,
-    "공예":        `${storeName} 장인의 손길이 담긴 수제 공예품. 단 하나뿐인 기념일 선물.`,
-    "식품·기타":  `${storeName}의 로컬 시그니처. 대전충청 정성을 담아 보내드립니다.`,
+    "전통과자": `${region}의 ${storeName}이 손수 빚은 떡·한과 세트. 명절·부모님 선물에 정성을 담아.`,
+    "수제빵":    `${storeName}에서 매일 아침 굽는 수제빵 모음. 방부제 없는 솔직한 맛.`,
+    "장·반찬":  `${storeName}의 김치·장아찌·젓갈 모듬. 엄마손 반찬 그대로 댁으로.`,
+    "한식":      `${region}의 ${storeName}이 차려내는 정통 한식 패키지. 가족 모임·명절 추천.`,
+    "분식":      `${storeName}의 인기 분식 메뉴 세트. 시장에서 먹던 그 추억의 맛.`,
+    "정육":      `${storeName}이 직접 고른 프리미엄 한우. 명절 선물의 정석.`,
+    "수산":      `${storeName}의 시장 직송 건어물·젓갈 모듬. 짭조름한 한국의 맛.`,
+    "농산물":    `${storeName}이 매일 들여오는 제철 농산물 박스. 신선함 그대로.`,
+    "전통공예":  `${storeName} 장인의 손길이 담긴 수제 공예품. 단 하나뿐인 기념일 선물.`,
+    "화훼":      `${storeName}이 다듬는 시장 꽃 한 다발. 마음 그대로 전합니다.`,
+    "특산물":    `${region}의 ${storeName}이 자랑하는 대전 특산물. 진짜 로컬의 맛.`,
+    "기타":      `${storeName}의 전통시장 시그니처. 대전의 정성을 담아 보내드립니다.`,
   };
-  return lines[category] || `${storeName}의 정성 가득한 로컬 선물.`;
+  return lines[category] || `${storeName}의 정성 가득한 시장 선물.`;
 }
 
 // ─────────────────────────────────────────────
@@ -195,9 +228,46 @@ for (const spot of SPOTS) {
 
 console.log(`\n✨ 후보 가게 ${candidates.length}개 수집`);
 
-// 100개 샘플링 (셔플 후 슬라이스)
-const shuffled = candidates.sort(() => Math.random() - 0.5).slice(0, 100);
-console.log(`📦 샘플링 ${shuffled.length}개\n`);
+// 카테고리별 후보 분포 출력
+const grouped = {};
+for (const it of candidates) {
+  const cat = categoryOf(it);
+  (grouped[cat] = grouped[cat] || []).push(it);
+}
+console.log("\n📊 후보 카테고리 분포:");
+for (const [cat, arr] of Object.entries(grouped).sort((a, b) => b[1].length - a[1].length)) {
+  console.log(`   ${cat.padEnd(8)} : ${arr.length}`);
+}
+
+// 시장 다양성을 위한 카테고리별 quota
+const QUOTA = {
+  "장·반찬":   15,
+  "한식":       20,
+  "전통과자":   12,
+  "특산물":     12,
+  "농산물":     10,
+  "분식":       8,
+  "정육":       6,
+  "수산":       6,
+  "전통공예":   5,
+  "수제빵":     4,
+  "화훼":       2,
+  "기타":       5,
+};
+
+let sampled = [];
+for (const [cat, q] of Object.entries(QUOTA)) {
+  const pool = (grouped[cat] || []).sort(() => Math.random() - 0.5);
+  sampled.push(...pool.slice(0, q));
+}
+// 부족하면 남은 후보로 보충 (100개 채우기)
+if (sampled.length < 100) {
+  const used = new Set(sampled.map((it) => it.bizesId));
+  const rest = candidates.filter((it) => !used.has(it.bizesId)).sort(() => Math.random() - 0.5);
+  sampled.push(...rest.slice(0, 100 - sampled.length));
+}
+const shuffled = sampled.sort(() => Math.random() - 0.5).slice(0, 100);
+console.log(`\n📦 최종 샘플링 ${shuffled.length}개\n`);
 
 // ─────────────────────────────────────────────
 const stores = shuffled.map((it) => ({
@@ -205,7 +275,7 @@ const stores = shuffled.map((it) => ({
   name: it.bizesNm.slice(0, 60),
   address: it.rdnmAdr,
   category: categoryOf(it),
-  region: "대전충청",
+  region: "대전",
   lat: parseFloat(it.lat),
   lng: parseFloat(it.lon),
   description: `${it.signguNm} ${it.adongNm}의 ${it.indsMclsNm} 전문점.`,

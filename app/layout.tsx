@@ -11,9 +11,9 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "장터한상 — AI가 차려주는 로컬 선물 패키지",
+  title: "장터한상 — AI가 차려주는 대전 전통시장 한 상",
   description:
-    "예산만 알려주세요. AI가 대전충청 소상공인 상품으로 마음을 담은 선물 세트를 만들어 드립니다.",
+    "예산만 알려주세요. AI가 대전 전통시장 소상공인 상품으로 마음을 담은 한 상을 차려드립니다.",
 };
 
 export default function RootLayout({

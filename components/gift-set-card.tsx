@@ -43,7 +43,7 @@ export default function GiftSetCard({
       >
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-900/80">
           <Sparkles className="h-3.5 w-3.5" />
-          AI 추천 세트 #{rank}
+          AI가 차린 한 상 #{rank}
         </div>
         <h3 className="mt-2 text-xl font-bold text-stone-900">{set.title}</h3>
         <p className="mt-1 text-sm text-stone-800/80 leading-relaxed">
@@ -78,7 +78,7 @@ export default function GiftSetCard({
 
       <div className="border-t bg-muted/30 px-5 py-4 flex items-center justify-between">
         <div>
-          <p className="text-xs text-muted-foreground">세트 합계</p>
+          <p className="text-xs text-muted-foreground">한 상 합계</p>
           <p className="text-2xl font-extrabold">
             {set.total_price.toLocaleString()}
             <span className="text-sm font-normal text-muted-foreground"> 원</span>
@@ -86,7 +86,7 @@ export default function GiftSetCard({
         </div>
         <Button onClick={addAll} className="gap-2">
           <ShoppingCart className="h-4 w-4" />
-          세트 담기
+          한 상 담기
         </Button>
       </div>
     </Card>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, ShieldCheck, MapPin, ArrowRight } from "lucide-react";
+import { Sparkles, ShieldCheck, MapPin, ArrowRight, Store } from "lucide-react";
 import RecommendForm from "@/components/recommend-form";
 import ProductCard from "@/components/product-card";
 import { createClient } from "@/lib/supabase/server";
@@ -7,23 +7,29 @@ import type { Product } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
-async function getPopularProducts(): Promise<Product[]> {
+async function getHomeData(): Promise<{ products: Product[]; storeCount: number }> {
   try {
     const supabase = await createClient();
-    const { data } = await supabase
-      .from("products")
-      .select("*, store:stores(*)")
-      .eq("is_approved", true)
-      .order("created_at", { ascending: false })
-      .limit(8);
-    return (data || []) as Product[];
+    const [productsRes, storesRes] = await Promise.all([
+      supabase
+        .from("products")
+        .select("*, store:stores(*)")
+        .eq("is_approved", true)
+        .order("created_at", { ascending: false })
+        .limit(8),
+      supabase.from("stores").select("id", { count: "exact", head: true }),
+    ]);
+    return {
+      products: (productsRes.data || []) as Product[],
+      storeCount: storesRes.count ?? 0,
+    };
   } catch {
-    return [];
+    return { products: [], storeCount: 0 };
   }
 }
 
 export default async function HomePage() {
-  const products = await getPopularProducts();
+  const { products, storeCount } = await getHomeData();
 
   return (
     <div>
@@ -49,24 +55,31 @@ export default async function HomePage() {
                 예산만 알려주세요.
                 <br />
                 <span className="bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">
-                  마음 담은 선물
+                  대전 전통시장 한 상
                 </span>
-                은 AI가 골라요.
+                을 AI가 차려드려요.
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                카카오 선물하기에 없는 동네 수제품·로컬 특산물.
+                카카오 선물하기에 없는 중앙시장 떡집·태평시장 반찬가게·유성5일장 정육점.
                 <br className="hidden md:block" />
-                대전충청 소상공인의 정성을 담아 AI가 선물 세트를 구성해드립니다.
+                대전 전통시장 12곳의 정성을 담아 AI가 한 상을 차려드립니다.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <MapPin className="h-4 w-4 text-primary" /> 10개 로컬 가게
+                  <Store className="h-4 w-4 text-primary" />
+                  대전 전통시장 12곳
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" /> Claude AI 큐레이션
+                  <MapPin className="h-4 w-4 text-primary" />
+                  로컬 가게 {storeCount > 0 ? `${storeCount}곳` : "준비 중"}
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <ShieldCheck className="h-4 w-4 text-primary" /> 7중 보안
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Gemini AI 큐레이션
+                </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  7중 보안
                 </div>
               </div>
             </div>
@@ -83,10 +96,10 @@ export default async function HomePage() {
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
-              지금 인기있는 로컬 선물
+              오늘 시장에서 만난 선물
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              대전충청 소상공인이 직접 만든 정성 가득한 상품들
+              대전 전통시장 가게 사장님들이 직접 차려낸 정성 가득한 상품
             </p>
           </div>
           <Link
@@ -100,11 +113,7 @@ export default async function HomePage() {
         {products.length === 0 ? (
           <div className="rounded-xl border border-dashed bg-muted/40 p-10 text-center">
             <p className="text-sm text-muted-foreground">
-              아직 등록된 상품이 없습니다. <br />
-              <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                supabase/seed.sql
-              </code>{" "}
-              을 적용해 데모 데이터를 채워주세요.
+              아직 등록된 상품이 없습니다.
             </p>
           </div>
         ) : (
@@ -125,14 +134,14 @@ export default async function HomePage() {
           <div className="grid gap-6 md:grid-cols-3 mt-10">
             {[
               {
-                title: "AI가 차려주는 선물 한 상",
-                desc: "예산·받는 분·자리만 알려주세요. Claude AI가 어울리는 세 가지 패키지를 직접 차려드립니다.",
+                title: "AI가 차려주는 한 상",
+                desc: "예산·받는 분·자리만 알려주세요. Gemini AI가 시장 가게를 조합해 세 가지 차림을 골라드립니다.",
                 icon: Sparkles,
               },
               {
-                title: "로컬에만 있는 진짜 정성",
-                desc: "카카오 선물하기엔 없는 대전충청 소상공인의 수제품 컬렉션.",
-                icon: MapPin,
+                title: "대전 시장의 진짜 정성",
+                desc: "중앙시장 떡집·태평시장 반찬가게·유성5일장 정육점까지, 카카오 선물하기엔 없는 한 상.",
+                icon: Store,
               },
               {
                 title: "안심하고 결제",
@@ -159,7 +168,7 @@ export default async function HomePage() {
 
       <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground">
         <p>SOGRA Hackathon 2026 · ARGOS · 충남대학교</p>
-        <p className="mt-1">AI가 차려주는 로컬 선물 패키지 데모 — 모든 결제는 가상입니다.</p>
+        <p className="mt-1">AI가 차려주는 대전 전통시장 한 상 — 모든 결제는 가상입니다.</p>
       </footer>
     </div>
   );

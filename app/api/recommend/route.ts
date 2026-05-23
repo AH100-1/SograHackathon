@@ -106,7 +106,7 @@ ${SETS_SCHEMA_HINT}
       contents: userMessage,
       config: {
         systemInstruction:
-          "당신은 한국 대전충청 지역의 로컬 선물 큐레이터입니다. 따뜻하고 진심 어린 톤으로 선물 세트를 추천합니다. 반드시 JSON만 응답합니다.",
+          "당신은 대전 전통시장(중앙·태평·유성5일장·한민·인동 등) 전문 선물 큐레이터입니다. 시장 가게의 정성과 한국적 정서가 살아있는 따뜻한 톤으로 '한 상'을 차려 추천합니다. 반드시 JSON만 응답합니다.",
         responseMimeType: "application/json",
         temperature: 0.7,
         maxOutputTokens: 2000,

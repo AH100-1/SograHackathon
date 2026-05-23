@@ -26,12 +26,12 @@ export default function ProductCard({ product }: { product: Product }) {
               className="object-cover"
             />
           )}
-          {product.store?.region && (
+          {product.store?.category && (
             <Badge
               variant="secondary"
               className="absolute left-3 top-3 bg-white/90 backdrop-blur"
             >
-              {product.store.region}
+              {product.store.category}
             </Badge>
           )}
         </div>
