@@ -33,20 +33,35 @@ const SPOTS = [
   { name: "아산 온양",   cx: 127.0046, cy: 36.7900, r: 1000 },
 ];
 
-// 선물 가능성 있는 업종 키워드 (indsLclsNm + indsMclsNm + indsSclsNm 어디든 포함)
-const GIFT_KEYWORDS = [
-  "음식료품", "제과", "제빵", "떡", "한과", "한식",
-  "전통", "수제", "공예", "도자", "차", "건강", "꿀",
-  "장류", "젓갈", "농산물", "특산물", "기념품",
-];
-
 // 명백히 선물용 아닌 업종 제외
 const EXCLUDE_KEYWORDS = [
+  "주점", "유흥", "단란",
   "주유소", "세차", "자동차", "타이어", "부동산",
-  "이미용", "마사지", "헬스", "노래", "PC방", "당구",
+  "이미용", "이용", "미용", "마사지", "헬스", "노래", "PC방", "당구",
   "은행", "증권", "보험", "병원", "의원", "약국",
   "학원", "교습소", "독서실", "어린이집",
+  "법무", "회계", "컨설팅", "부동산",
 ];
+
+// 선물 후보로 포함할 중분류 키워드 (소매 대분류 안에서만)
+const RETAIL_GIFT_PATTERNS = /음식|식품|농산|특산|기념|공예|차|화훼/;
+
+function shouldInclude(item) {
+  const lcls = item.indsLclsNm || "";   // 대분류 (음식 / 소매 / 수리·개인 / ...)
+  const mcls = item.indsMclsNm || "";   // 중분류 (한식 / 카페 / ...)
+  const scls = item.indsSclsNm || "";   // 소분류
+  const full = `${lcls} ${mcls} ${scls}`;
+
+  if (EXCLUDE_KEYWORDS.some((k) => full.includes(k))) return false;
+
+  // 음식 대분류 → 한식, 일식, 카페, 제과, 떡 등 모두 포함
+  if (lcls === "음식") return true;
+
+  // 소매 대분류 → 식품·특산·공예·차 관련만
+  if (lcls === "소매" && RETAIL_GIFT_PATTERNS.test(mcls + scls)) return true;
+
+  return false;
+}
 
 async function fetchRadius(spot) {
   const url = "http://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius";
@@ -72,11 +87,14 @@ async function fetchRadius(spot) {
 function categoryOf(item) {
   const m = item.indsMclsNm || "";
   const s = item.indsSclsNm || "";
-  if (/한식|향토/.test(s + m)) return "식품·한식";
-  if (/제과|제빵|떡|한과/.test(s + m)) return "식품·과자";
-  if (/차|커피/.test(s + m)) return "건강·차";
-  if (/꿀|장류|젓갈|농산물|특산/.test(s + m)) return "식품·전통";
-  if (/공예|도자/.test(s + m)) return "공예";
+  const full = m + s;
+  if (/제과|제빵|떡|한과/.test(full)) return "식품·과자";
+  if (/한식|향토/.test(full)) return "식품·한식";
+  if (/카페|커피|비알코올|차/.test(full)) return "음료·카페";
+  if (/일식|중식|양식|아시아/.test(full)) return "식품·외식";
+  if (/농산|특산/.test(full)) return "식품·특산";
+  if (/공예|도자|화훼/.test(full)) return "공예";
+  if (/음식|식품/.test(full)) return "식품·기타";
   return "식품·기타";
 }
 

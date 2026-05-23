@@ -78,7 +78,7 @@ export default function Navbar() {
           <div className="flex flex-col leading-tight">
             <span className="font-extrabold text-lg tracking-tight">장터한상</span>
             <span className="text-[10px] text-muted-foreground -mt-0.5">
-              로컬 선물 오마카세
+              AI가 차려주는 로컬 선물 패키지
             </span>
           </div>
         </Link>

@@ -163,7 +163,7 @@ export default async function HomePage() {
 
       <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground">
         <p>SOGRA Hackathon 2026 · ARGOS · 충남대학교</p>
-        <p className="mt-1">로컬 선물 오마카세 데모 — 모든 결제는 가상입니다.</p>
+        <p className="mt-1">AI가 차려주는 로컬 선물 패키지 데모 — 모든 결제는 가상입니다.</p>
       </footer>
     </div>
   );
