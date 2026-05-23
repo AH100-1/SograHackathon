@@ -83,12 +83,8 @@ function normalize(url) {
   if (!url) return null;
   if (url.startsWith("https://")) return url;
   if (url.startsWith("http://")) {
-    const httpsUrl = url.replace(/^http:\/\//, "https://");
-    // imgnews.naver.net, daumcdn.net, pstatic.net 등은 https 정상
-    if (/imgnews\.naver\.|\.daumcdn\.|\.pstatic\.|\.kakaocdn\.|\.naver\./i.test(httpsUrl)) {
-      return httpsUrl;
-    }
-    return null;
+    // 모든 http → https 시도 (대부분 도메인이 https 지원)
+    return url.replace(/^http:\/\//, "https://");
   }
   return null;
 }
