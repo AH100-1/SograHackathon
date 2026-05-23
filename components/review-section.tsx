@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Star } from "lucide-react";
+import { Star, MessageSquareHeart, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { csrfFetch } from "@/lib/csrf-client";
 import type { Review } from "@/types/database";
@@ -56,13 +56,19 @@ export default function ReviewSection({
 
   return (
     <section>
-      <h2 className="text-xl font-bold tracking-tight">
-        리뷰 <span className="text-muted-foreground">{reviews.length}</span>
-      </h2>
+      <div className="flex items-center gap-2">
+        <MessageSquareHeart className="h-5 w-5 text-maple" />
+        <h2 className="text-xl font-extrabold tracking-tight">
+          리뷰{" "}
+          <span className="ml-1 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-maple/10 px-2 text-sm font-bold text-maple">
+            {reviews.length}
+          </span>
+        </h2>
+      </div>
 
       {isAuthed ? (
-        <Card className="mt-4 p-5">
-          <form onSubmit={submit} className="space-y-3">
+        <Card className="mt-4 rounded-2xl border-border bg-card p-5 shadow-sm">
+          <form onSubmit={submit} className="space-y-4">
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
@@ -70,68 +76,85 @@ export default function ReviewSection({
                   type="button"
                   onClick={() => setRating(n)}
                   aria-label={`${n}점`}
+                  className="transition-transform hover:scale-110"
                 >
                   <Star
-                    className={`h-6 w-6 ${
+                    className={`h-7 w-7 ${
                       n <= rating
-                        ? "fill-amber-400 text-amber-400"
+                        ? "fill-[var(--mustard)] text-[var(--mustard)]"
                         : "text-muted-foreground/40"
                     }`}
                   />
                 </button>
               ))}
+              <span className="ml-2 text-sm font-semibold text-bark/70">
+                {rating}.0
+              </span>
             </div>
             <Textarea
-              placeholder="리뷰를 입력하세요 (XSS 공격을 시도해보세요 — DOMPurify로 차단됩니다)"
+              placeholder="이 가을, 받은 정성을 한 줄로 남겨주세요."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               maxLength={1000}
               rows={3}
+              className="rounded-xl"
             />
             <div className="flex justify-end">
-              <Button type="submit" disabled={submitting}>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="gap-2 bg-maple-gradient text-white shadow-maple hover:opacity-90"
+              >
+                <Pencil className="h-4 w-4" />
                 {submitting ? "등록 중…" : "리뷰 등록"}
               </Button>
             </div>
           </form>
         </Card>
       ) : (
-        <Card className="mt-4 p-6 text-center text-sm text-muted-foreground">
+        <Card className="mt-4 rounded-2xl border-dashed border-maple/30 bg-cream/40 p-6 text-center text-sm text-bark/70">
           로그인 후 리뷰를 작성할 수 있어요.
         </Card>
       )}
 
       <div className="mt-6 space-y-3">
         {reviews.length === 0 && (
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            아직 리뷰가 없습니다. 첫 리뷰를 남겨주세요!
+          <p className="text-sm text-muted-foreground py-10 text-center">
+            아직 리뷰가 없습니다. 첫 가을 한 줄을 남겨주세요!
           </p>
         )}
         {reviews.map((r) => (
-          <Card key={r.id} className="p-4">
+          <Card
+            key={r.id}
+            className="rounded-2xl border-border bg-card p-5 transition-shadow hover:shadow-md"
+          >
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold">
-                {r.user?.display_name || "익명"}
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-maple-gradient text-xs font-bold text-white">
+                  {(r.user?.display_name || "익")[0]}
+                </span>
+                <p className="text-sm font-bold text-foreground">
+                  {r.user?.display_name || "익명"}
+                </p>
+              </div>
               <div className="flex">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
                     className={`h-4 w-4 ${
                       i < r.rating
-                        ? "fill-amber-400 text-amber-400"
+                        ? "fill-[var(--mustard)] text-[var(--mustard)]"
                         : "text-muted-foreground/30"
                     }`}
                   />
                 ))}
               </div>
             </div>
-            {/* XSS 방어: 서버에서 sanitize 후 저장된 HTML 안전하게 렌더 */}
             <div
-              className="mt-2 text-sm leading-relaxed"
+              className="mt-3 text-sm leading-relaxed text-foreground/90"
               dangerouslySetInnerHTML={{ __html: r.content }}
             />
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-2 text-xs text-muted-foreground">
               {new Date(r.created_at).toLocaleDateString("ko-KR")}
             </p>
           </Card>

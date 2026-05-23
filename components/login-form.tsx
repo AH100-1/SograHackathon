@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gift } from "lucide-react";
+import { Leaf, AlertTriangle } from "lucide-react";
 import { csrfFetch } from "@/lib/csrf-client";
 import { toast } from "sonner";
 
 export default function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const redirectTo = params.get("redirect") || "/";
 
@@ -54,9 +53,8 @@ export default function LoginForm() {
         return;
       }
       toast.success("로그인 되었습니다");
-      // 풀 페이지 reload — 서버 쿠키 박혀있으니 새 페이지에서 navbar가 자동 인식
       window.location.href = redirectTo;
-    } catch (err: any) {
+    } catch {
       const msg = "네트워크 오류가 발생했습니다. 다시 시도해주세요.";
       setErrorMsg(msg);
       toast.error(msg);
@@ -66,20 +64,25 @@ export default function LoginForm() {
   }
 
   return (
-    <Card className="border-2 border-primary/10 p-8">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Gift className="h-4 w-4" />
+    <Card className="relative overflow-hidden rounded-3xl border-2 border-maple/15 bg-card p-8 shadow-maple">
+      <div className="h-1.5 w-full bg-maple-gradient absolute top-0 left-0" />
+      <div className="flex items-center gap-3 pt-2">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-maple-gradient text-white shadow-maple">
+          <Leaf className="h-5 w-5" />
         </span>
         <div>
-          <h1 className="font-extrabold text-xl">장터한상</h1>
-          <p className="text-xs text-muted-foreground">로그인</p>
+          <h1 className="font-extrabold text-xl tracking-tight">
+            장터<span className="text-maple">한상</span>
+          </h1>
+          <p className="text-xs text-bark/70">다시 오신 걸 환영합니다</p>
         </div>
       </div>
 
       <form onSubmit={submit} className="mt-6 space-y-4">
         <div>
-          <Label htmlFor="email">이메일</Label>
+          <Label htmlFor="email" className="text-sm font-bold text-bark">
+            이메일
+          </Label>
           <Input
             id="email"
             type="email"
@@ -87,11 +90,13 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1.5"
+            className="mt-1.5 rounded-lg"
           />
         </div>
         <div>
-          <Label htmlFor="password">비밀번호</Label>
+          <Label htmlFor="password" className="text-sm font-bold text-bark">
+            비밀번호
+          </Label>
           <Input
             id="password"
             type="password"
@@ -100,23 +105,31 @@ export default function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="mt-1.5"
+            className="mt-1.5 rounded-lg"
           />
         </div>
 
         {errorMsg && (
-          <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="flex items-start gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
             {errorMsg}
           </p>
         )}
 
-        <Button type="submit" className="w-full" disabled={submitting || !!lockedUntil}>
+        <Button
+          type="submit"
+          className="w-full h-11 gap-2 bg-maple-gradient text-white shadow-maple hover:opacity-90"
+          disabled={submitting || !!lockedUntil}
+        >
           {submitting ? "로그인 중…" : "로그인"}
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-sm text-bark/70">
           아직 계정이 없으신가요?{" "}
-          <Link href="/signup" className="font-semibold text-primary hover:underline">
+          <Link
+            href="/signup"
+            className="font-bold text-maple hover:underline"
+          >
             회원가입
           </Link>
         </p>

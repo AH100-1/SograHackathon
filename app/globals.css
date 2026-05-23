@@ -4,6 +4,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =========================================================
+   장터한상 · 가을 단풍(Maple Red) 디자인 토큰
+   - Primary: 단풍 빨강 #B8442B
+   - Accent : 감자색 오렌지 #D4621C
+   - Bg     : 크림 #FBF5EB
+   - Muted  : 명조 갈색 #8B5E3C
+   ========================================================= */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -39,6 +47,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* 가을 단풍 색상 직접 호출용 */
+  --color-maple: var(--maple);
+  --color-persimmon: var(--persimmon);
+  --color-mustard: var(--mustard);
+  --color-cream: var(--cream);
+  --color-bark: var(--bark);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,72 +65,121 @@
 }
 
 :root {
-  --background: oklch(0.99 0.005 80);
-  --foreground: oklch(0.18 0.02 50);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 50);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 50);
-  --primary: oklch(0.62 0.18 35);
-  --primary-foreground: oklch(0.99 0.01 80);
-  --secondary: oklch(0.95 0.02 70);
-  --secondary-foreground: oklch(0.25 0.04 40);
-  --muted: oklch(0.96 0.01 70);
-  --muted-foreground: oklch(0.5 0.03 50);
-  --accent: oklch(0.94 0.06 80);
-  --accent-foreground: oklch(0.3 0.08 40);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.01 60);
-  --input: oklch(0.92 0.01 60);
-  --ring: oklch(0.62 0.18 35);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* ── 베이스 ── */
+  --background: oklch(0.975 0.014 82);       /* 크림 #FBF5EB */
+  --foreground: oklch(0.22 0.04 45);         /* 진한 호두색 */
+
+  --card: oklch(0.995 0.006 85);             /* 한지 화이트 */
+  --card-foreground: oklch(0.22 0.04 45);
+  --popover: oklch(0.995 0.006 85);
+  --popover-foreground: oklch(0.22 0.04 45);
+
+  /* ── 단풍 빨강(Primary) #B8442B ── */
+  --primary: oklch(0.525 0.165 35);
+  --primary-foreground: oklch(0.985 0.014 85);
+
+  /* ── 베이지 세컨더리 ── */
+  --secondary: oklch(0.945 0.028 75);        /* 따뜻한 베이지 */
+  --secondary-foreground: oklch(0.30 0.06 40);
+
+  /* ── 가을 머스타드 muted ── */
+  --muted: oklch(0.935 0.022 78);
+  --muted-foreground: oklch(0.48 0.05 55);   /* 명조 갈색 #8B5E3C */
+
+  /* ── 감자색 accent #D4621C ── */
+  --accent: oklch(0.93 0.060 70);            /* accent 배경: 옅은 호박 */
+  --accent-foreground: oklch(0.42 0.14 45);
+
+  /* ── 와인 데스트럭티브 ── */
+  --destructive: oklch(0.50 0.18 28);        /* 가을 와인 #8B2D2D 톤 */
+
+  --border: oklch(0.89 0.025 70);            /* 따뜻한 베이지 보더 */
+  --input: oklch(0.89 0.025 70);
+  --ring: oklch(0.525 0.165 35);             /* primary 와 일치 */
+
+  /* ── 가을 차트 팔레트 ── */
+  --chart-1: oklch(0.55 0.165 35);   /* 단풍 빨강 */
+  --chart-2: oklch(0.68 0.16 60);    /* 감 오렌지 */
+  --chart-3: oklch(0.78 0.135 90);   /* 은행 노랑 */
+  --chart-4: oklch(0.52 0.08 55);    /* 호두 갈색 */
+  --chart-5: oklch(0.62 0.10 145);   /* 가을 풀잎 */
+
+  --radius: 0.75rem;                  /* 살짝 더 둥글게 — 가을 따뜻함 */
+
+  /* ── 사이드바(관리자) ── */
+  --sidebar: oklch(0.96 0.020 75);
+  --sidebar-foreground: oklch(0.25 0.04 45);
+  --sidebar-primary: oklch(0.525 0.165 35);
+  --sidebar-primary-foreground: oklch(0.985 0.014 85);
+  --sidebar-accent: oklch(0.92 0.055 70);
+  --sidebar-accent-foreground: oklch(0.42 0.14 45);
+  --sidebar-border: oklch(0.88 0.030 70);
+  --sidebar-ring: oklch(0.525 0.165 35);
+
+  /* ── 가을 컬러 직접 호출용 ── */
+  --maple: #B8442B;       /* 단풍 빨강 */
+  --persimmon: #D4621C;   /* 감자 오렌지 */
+  --mustard: #E5A82C;     /* 은행 노랑 */
+  --cream: #FBF5EB;       /* 크림 베이지 */
+  --bark: #6B4423;        /* 나무껍질 갈색 */
+
+  /* ── Elevation (sendgridtest 영감) ── */
+  --shadow-sm: 0 1px 2px 0 rgb(139 94 60 / 0.06);
+  --shadow: 0 1px 3px 0 rgb(139 94 60 / 0.10), 0 1px 2px -1px rgb(139 94 60 / 0.08);
+  --shadow-md: 0 4px 8px -2px rgb(139 94 60 / 0.10), 0 2px 4px -2px rgb(139 94 60 / 0.08);
+  --shadow-lg: 0 12px 20px -4px rgb(139 94 60 / 0.12), 0 6px 8px -4px rgb(139 94 60 / 0.08);
+  --shadow-xl: 0 24px 32px -8px rgb(139 94 60 / 0.18), 0 10px 14px -6px rgb(139 94 60 / 0.10);
+  --shadow-maple: 0 6px 20px -4px rgb(184 68 43 / 0.28);
+  --shadow-maple-lg: 0 14px 36px -8px rgb(184 68 43 / 0.35);
+
+  /* ── 그라데이션 ── */
+  --gradient-maple: linear-gradient(135deg, #B8442B 0%, #D4621C 55%, #E5A82C 100%);
+  --gradient-warm: linear-gradient(180deg, #FBF5EB 0%, #F4E4CB 100%);
+  --gradient-hero: radial-gradient(60% 80% at 80% 0%, rgba(229,168,44,0.20) 0%, transparent 60%),
+                   radial-gradient(50% 70% at 0% 30%, rgba(184,68,43,0.15) 0%, transparent 60%),
+                   linear-gradient(180deg, #FBF5EB 0%, #FBF5EB 100%);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --background: oklch(0.18 0.020 50);
+  --foreground: oklch(0.96 0.014 80);
+  --card: oklch(0.22 0.025 50);
+  --card-foreground: oklch(0.96 0.014 80);
+  --popover: oklch(0.22 0.025 50);
+  --popover-foreground: oklch(0.96 0.014 80);
+  --primary: oklch(0.66 0.16 38);
+  --primary-foreground: oklch(0.16 0.020 45);
+  --secondary: oklch(0.30 0.035 50);
+  --secondary-foreground: oklch(0.96 0.014 80);
+  --muted: oklch(0.28 0.030 50);
+  --muted-foreground: oklch(0.72 0.025 70);
+  --accent: oklch(0.34 0.075 50);
+  --accent-foreground: oklch(0.92 0.040 75);
+  --destructive: oklch(0.62 0.20 28);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --ring: oklch(0.66 0.16 38);
+  --chart-1: oklch(0.66 0.16 38);
+  --chart-2: oklch(0.74 0.15 60);
+  --chart-3: oklch(0.82 0.13 90);
+  --chart-4: oklch(0.58 0.08 55);
+  --chart-5: oklch(0.66 0.10 145);
+  --sidebar: oklch(0.20 0.025 50);
+  --sidebar-foreground: oklch(0.96 0.014 80);
+  --sidebar-primary: oklch(0.66 0.16 38);
+  --sidebar-primary-foreground: oklch(0.16 0.020 45);
+  --sidebar-accent: oklch(0.30 0.060 50);
+  --sidebar-accent-foreground: oklch(0.92 0.040 75);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.66 0.16 38);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.7);
+  --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.65);
+  --shadow-lg: 0 12px 20px -4px rgb(0 0 0 / 0.7);
+  --shadow-xl: 0 24px 32px -8px rgb(0 0 0 / 0.8);
+  --shadow-maple: 0 6px 20px -4px rgb(184 68 43 / 0.45);
+  --shadow-maple-lg: 0 14px 36px -8px rgb(184 68 43 / 0.55);
 }
 
 @layer base {
@@ -123,8 +188,136 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 12% -10%, rgba(229, 168, 44, 0.10), transparent 40%),
+      radial-gradient(circle at 92% 8%, rgba(184, 68, 43, 0.08), transparent 38%);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* =========================================================
+   가을 풍 유틸리티 클래스
+   ========================================================= */
+@layer utilities {
+  .bg-maple-gradient {
+    background-image: var(--gradient-maple);
+  }
+  .bg-warm-gradient {
+    background-image: var(--gradient-warm);
+  }
+  .bg-hero-autumn {
+    background-image: var(--gradient-hero);
+  }
+  .text-maple {
+    color: var(--maple);
+  }
+  .text-persimmon {
+    color: var(--persimmon);
+  }
+  .text-mustard {
+    color: var(--mustard);
+  }
+  .text-bark {
+    color: var(--bark);
+  }
+  .shadow-maple {
+    box-shadow: var(--shadow-maple);
+  }
+  .shadow-maple-lg {
+    box-shadow: var(--shadow-maple-lg);
+  }
+  .bg-maple {
+    background-color: var(--maple);
+  }
+  .bg-persimmon {
+    background-color: var(--persimmon);
+  }
+  .bg-mustard {
+    background-color: var(--mustard);
+  }
+  .bg-cream {
+    background-color: var(--cream);
+  }
+  .ring-maple {
+    --tw-ring-color: var(--maple);
+  }
+  .border-maple {
+    border-color: var(--maple);
+  }
+  /* 살랑 떨어지는 단풍잎 애니메이션 */
+  @keyframes leaf-fall {
+    0% { transform: translateY(-20%) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.9; }
+    100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
+  }
+  @keyframes leaf-sway {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(20px); }
+  }
+  .animate-leaf-fall {
+    animation: leaf-fall 14s linear infinite, leaf-sway 4s ease-in-out infinite;
+  }
+  /* 부드러운 등장 */
+  @keyframes warm-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-warm-rise {
+    animation: warm-rise 0.5s ease-out both;
+  }
+  /* 꿈돌이 장보기 — 위아래 통통 */
+  @keyframes kkumdori-bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+  }
+  .animate-kkumdori-bob {
+    animation: kkumdori-bob 0.9s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+  /* 꿈돌이 좌우 걷기 */
+  @keyframes kkumdori-walk {
+    0% { transform: translateX(-30%); }
+    50% { transform: translateX(30%); }
+    100% { transform: translateX(-30%); }
+  }
+  .animate-kkumdori-walk {
+    animation: kkumdori-walk 6s ease-in-out infinite;
+  }
+  /* 안테나 별 반짝 */
+  @keyframes star-twinkle {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(1.25) rotate(20deg); opacity: 0.85; }
+  }
+  .animate-star-twinkle {
+    animation: star-twinkle 1.4s ease-in-out infinite;
+    transform-origin: center;
+  }
+  /* 시장 좌판 옆으로 흘러가기 */
+  @keyframes market-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-market-scroll {
+    animation: market-scroll 18s linear infinite;
+  }
+  /* 장바구니에 담기는 아이템 */
+  @keyframes basket-pop {
+    0% { transform: translateY(-30px) scale(0.5); opacity: 0; }
+    60% { transform: translateY(2px) scale(1.1); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .animate-basket-pop {
+    animation: basket-pop 1.4s ease-out infinite;
+  }
+  /* 진행 점 호흡 */
+  @keyframes dot-breath {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+  .animate-dot-breath {
+    animation: dot-breath 1.2s ease-in-out infinite;
   }
 }

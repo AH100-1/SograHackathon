@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBasket, Truck, Leaf } from "lucide-react";
 import { useCart } from "@/lib/store/cart";
 import { csrfFetch } from "@/lib/csrf-client";
 import { toast } from "sonner";
@@ -52,13 +52,25 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground/40" />
-        <h1 className="mt-4 text-2xl font-bold">장바구니가 비어있어요</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          AI 추천으로 마음에 드는 선물 세트를 찾아보세요.
+      <div className="mx-auto max-w-3xl px-4 py-24 text-center">
+        <div className="relative mx-auto inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-cream shadow-md">
+          <ShoppingBasket className="h-9 w-9 text-maple/60" />
+          <Leaf
+            aria-hidden
+            className="absolute -top-2 -right-3 h-7 w-7 text-mustard rotate-12"
+          />
+        </div>
+        <h1 className="mt-6 text-2xl font-extrabold">장바구니가 비어있어요</h1>
+        <p className="mt-2 text-sm text-bark/70">
+          AI 추천으로 마음에 드는 가을 한 상을 찾아보세요.
         </p>
-        <Link href="/" className={buttonVariants({ className: "mt-6" })}>
+        <Link
+          href="/"
+          className={buttonVariants({
+            className:
+              "mt-6 bg-maple-gradient text-white shadow-maple hover:opacity-90",
+          })}
+        >
           선물 만들러 가기
         </Link>
       </div>
@@ -67,14 +79,29 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="text-3xl font-extrabold tracking-tight">장바구니</h1>
-      <p className="mt-1 text-sm text-muted-foreground">총 {items.length}종의 상품</p>
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-persimmon">
+            My Basket
+          </p>
+          <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
+            장바구니
+          </h1>
+          <p className="mt-1 text-sm text-bark/70">
+            총 <span className="font-bold text-foreground">{items.length}</span>종의
+            상품
+          </p>
+        </div>
+      </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-3">
           {items.map(({ product, quantity }) => (
-            <Card key={product.id} className="flex items-center gap-4 p-4">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+            <Card
+              key={product.id}
+              className="flex items-center gap-4 rounded-2xl border-border bg-card p-4 transition-shadow hover:shadow-md"
+            >
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-warm-gradient ring-1 ring-border">
                 {product.image_url && (
                   <Image
                     src={product.image_url}
@@ -88,27 +115,27 @@ export default function CartPage() {
               <div className="flex-1 min-w-0">
                 <Link
                   href={`/product/${product.id}`}
-                  className="font-semibold hover:underline line-clamp-1"
+                  className="font-bold text-foreground hover:text-maple line-clamp-1"
                 >
                   {product.name}
                 </Link>
-                <p className="text-xs text-muted-foreground">
-                  {product.store?.name}
-                </p>
-                <p className="mt-1 font-bold">
+                <p className="text-xs text-bark/70">{product.store?.name}</p>
+                <p className="mt-1 font-extrabold text-foreground">
                   {(product.price * quantity).toLocaleString()}원
                 </p>
               </div>
-              <div className="inline-flex items-center rounded-md border">
+              <div className="inline-flex items-center rounded-xl border border-border bg-card overflow-hidden">
                 <button
-                  className="px-2 py-1 hover:bg-muted"
+                  className="px-2 py-1.5 text-bark hover:bg-accent transition-colors"
                   onClick={() => setQuantity(product.id, quantity - 1)}
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
-                <span className="w-8 text-center text-sm">{quantity}</span>
+                <span className="w-8 text-center text-sm font-bold">
+                  {quantity}
+                </span>
                 <button
-                  className="px-2 py-1 hover:bg-muted"
+                  className="px-2 py-1.5 text-bark hover:bg-accent transition-colors"
                   onClick={() => setQuantity(product.id, quantity + 1)}
                 >
                   <Plus className="h-3.5 w-3.5" />
@@ -119,6 +146,7 @@ export default function CartPage() {
                 size="icon"
                 onClick={() => remove(product.id)}
                 aria-label="삭제"
+                className="text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -126,36 +154,46 @@ export default function CartPage() {
           ))}
         </div>
 
-        <Card className="h-fit p-5 lg:sticky lg:top-20">
-          <h2 className="font-bold text-lg">결제 정보</h2>
+        <Card className="h-fit rounded-3xl border-2 border-maple/15 bg-card p-6 shadow-maple lg:sticky lg:top-20">
+          <h2 className="font-extrabold text-lg flex items-center gap-2">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-maple-gradient text-white">
+              <ShoppingBasket className="h-4 w-4" />
+            </span>
+            결제 정보
+          </h2>
           <Separator className="my-4" />
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">상품 합계</span>
-              <span>{total.toLocaleString()}원</span>
+              <span className="text-bark/70">상품 합계</span>
+              <span className="font-semibold">{total.toLocaleString()}원</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">배송비</span>
-              <span className="text-emerald-600 font-medium">무료</span>
+              <span className="text-bark/70 flex items-center gap-1">
+                <Truck className="h-3.5 w-3.5" />
+                배송비
+              </span>
+              <span className="text-maple font-bold">무료</span>
             </div>
           </div>
           <Separator className="my-4" />
           <div className="flex justify-between items-baseline">
-            <span className="font-semibold">최종 결제 금액</span>
-            <span className="text-2xl font-extrabold">
+            <span className="font-bold">최종 결제 금액</span>
+            <span className="text-2xl font-black bg-maple-gradient bg-clip-text text-transparent">
               {total.toLocaleString()}원
             </span>
           </div>
 
           <Button
             size="lg"
-            className="mt-5 w-full"
+            className="mt-6 w-full bg-maple-gradient text-white shadow-maple hover:opacity-90"
             onClick={checkout}
             disabled={placing}
           >
             {placing ? "결제 중…" : "주문하기 (데모)"}
           </Button>
-
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">
+            모든 결제는 가상입니다 — SOGRA Hackathon 데모
+          </p>
         </Card>
       </div>
     </div>
