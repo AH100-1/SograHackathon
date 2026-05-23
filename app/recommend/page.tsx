@@ -20,10 +20,12 @@ async function getRecommendations(params: {
   const proto = h.get("x-forwarded-proto") || "http";
   const base = `${proto}://${host}`;
 
+  // 로그인 세션 쿠키를 함께 전달
+  const cookie = h.get("cookie") || "";
   try {
     const res = await fetch(`${base}/api/recommend`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", cookie },
       body: JSON.stringify(params),
       cache: "no-store",
     });

@@ -38,6 +38,15 @@ const SETS_SCHEMA_HINT = `
 `;
 
 export async function POST(req: Request) {
+  // 로그인 필수 — 미로그인 시 401
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   let parsed;
   try {
     parsed = Schema.parse(await req.json());
@@ -56,7 +65,6 @@ export async function POST(req: Request) {
   const safePreference = stripHtml(preference);
 
   // 후보 상품 조회 — 단가가 예산 80% 이하 (3개 조합용 여유)
-  const supabase = await createClient();
   const { data: products, error } = await supabase
     .from("products")
     .select("*, store:stores(name, region, category)")

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Heart, Cake, Gift, HandHeart, Smile } from "lucide-react";
+import { Sparkles, Heart, Cake, Gift, HandHeart, Smile, LogIn } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 const targets = [
   { value: "부모님", label: "부모님", icon: Heart },
@@ -39,16 +41,41 @@ export default function RecommendForm() {
 
   const [budget, setBudget] = useState<number>(30000);
   const [target, setTarget] = useState("부모님");
+  const [customTarget, setCustomTarget] = useState("");
   const [occasion, setOccasion] = useState("생일");
   const [preference, setPreference] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const sb = createClient();
+    sb.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user));
+    const { data: sub } = sb.auth.onAuthStateChange((_e, session) =>
+      setIsLoggedIn(!!session?.user),
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   function submit() {
+    // "기타" 선택 시 사용자 입력값이 비어있으면 차단
+    if (target === "기타" && !customTarget.trim()) {
+      toast.error("받는 사람을 입력해주세요");
+      return;
+    }
+    const finalTarget = target === "기타" ? customTarget.trim() : target;
     const params = new URLSearchParams({
       budget: String(budget),
-      target,
+      target: finalTarget,
       occasion,
       preference,
     });
+
+    // 미로그인 시 로그인 페이지로 redirect (로그인 후 자동으로 결과 페이지로 진입)
+    if (isLoggedIn === false) {
+      const next = `/recommend?${params.toString()}`;
+      router.push(`/login?redirect=${encodeURIComponent(next)}`);
+      return;
+    }
+
     startTransition(() => {
       router.push(`/recommend?${params.toString()}`);
     });
@@ -121,6 +148,22 @@ export default function RecommendForm() {
           </div>
         </div>
 
+        {target === "기타" && (
+          <div>
+            <Label className="text-sm font-semibold">
+              받는 사람 직접 입력
+            </Label>
+            <Input
+              placeholder="예: 사촌오빠, 회사 후배, 조카…"
+              value={customTarget}
+              onChange={(e) => setCustomTarget(e.target.value)}
+              className="mt-2"
+              maxLength={30}
+              autoFocus
+            />
+          </div>
+        )}
+
         <div>
           <Label className="text-sm font-semibold">
             받는 분의 취향 <span className="font-normal text-muted-foreground">(선택)</span>
@@ -140,8 +183,17 @@ export default function RecommendForm() {
           onClick={submit}
           disabled={isPending}
         >
-          <Sparkles className="h-5 w-5" />
-          {isPending ? "AI가 한 상을 차리는 중…" : "AI에게 한 상 차려달라고 하기"}
+          {isLoggedIn === false ? (
+            <>
+              <LogIn className="h-5 w-5" />
+              로그인하고 AI 한 상 받기
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-5 w-5" />
+              {isPending ? "AI가 한 상을 차리는 중…" : "AI에게 한 상 차려달라고 하기"}
+            </>
+          )}
         </Button>
       </div>
     </Card>
