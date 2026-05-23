@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SOGRA Tech Stack</title>
+<title>SOGRA · Data Flow Architecture</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -16,25 +16,26 @@
     --text: #e5e7eb;
     --muted: #94a3b8;
     --dim: #64748b;
+    --rose: #fb7185;
+    --amber: #fbbf24;
+    --sky: #38bdf8;
+    --emerald: #34d399;
+    --violet: #a78bfa;
+    --pink: #ec4899;
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "Pretendard", "Apple SD Gothic Neo", sans-serif;
     background:
-      radial-gradient(1200px 600px at 20% -10%, rgba(244,63,94,.12), transparent 60%),
-      radial-gradient(900px 600px at 90% 10%, rgba(56,189,248,.10), transparent 60%),
+      radial-gradient(1200px 600px at 20% -10%, rgba(244,63,94,.10), transparent 60%),
+      radial-gradient(900px 600px at 90% 10%, rgba(56,189,248,.08), transparent 60%),
       var(--bg);
     color: var(--text);
     line-height: 1.5;
     padding: 36px 18px 80px;
   }
-  .container { max-width: 1320px; margin: 0 auto; }
+  .container { max-width: 1280px; margin: 0 auto; }
 
-  header {
-    text-align: center;
-    margin-bottom: 36px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-  }
+  header { text-align: center; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 5px 12px; border-radius: 999px;
@@ -51,190 +52,237 @@
   .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; }
 
   h2 {
-    font-size: 18px; font-weight: 700;
-    margin: 36px 0 14px;
-    display: flex; align-items: center; gap: 8px;
-    color: var(--text);
+    font-size: 20px; font-weight: 700;
+    margin: 44px 0 16px;
+    display: flex; align-items: center; gap: 10px;
   }
-  h2 .accent {
-    width: 4px; height: 18px; border-radius: 2px;
-    background: linear-gradient(180deg, #fb7185, #fbbf24);
+  h2 .accent { width: 4px; height: 20px; border-radius: 2px; background: linear-gradient(180deg, #fb7185, #fbbf24); }
+  h2 .tag {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border);
+    margin-left: auto;
   }
-  h2 .small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 6px; }
 
-  /* ============ STACK PYRAMID ============ */
-  .stack {
-    display: flex; flex-direction: column;
-    gap: 8px;
-    margin: 0 auto;
-    max-width: 1080px;
-  }
-  .tier {
+  /* ============ SYSTEM MAP ============ */
+  .system {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 20px;
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 18px;
-    align-items: center;
+    border-radius: 16px;
+    padding: 28px;
     position: relative;
-    transition: transform .2s, border-color .2s;
-  }
-  .tier:hover { border-color: var(--border-hi); transform: translateX(2px); }
-  .tier-label {
-    display: flex; align-items: center; gap: 10px;
-  }
-  .tier-icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    background: rgba(255,255,255,.04);
-    border: 1px solid var(--border);
-  }
-  .tier-name { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
-  .tier-name small { display: block; font-size: 10px; font-weight: 500; color: var(--muted); margin-top: 2px; }
-  .tier-techs {
-    display: flex; flex-wrap: wrap; gap: 6px;
   }
 
-  .tech {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    font-size: 12px;
-    font-weight: 600;
-    transition: transform .15s, background .15s;
-    white-space: nowrap;
-  }
-  .tech:hover { background: var(--card-hi); transform: translateY(-1px); }
-  .tech .v {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--dim);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  }
-  .tech .ico { font-size: 13px; line-height: 1; }
-
-  /* tier color accents (left border) */
-  .t-presentation { border-left: 3px solid #fb7185; }
-  .t-ui          { border-left: 3px solid #fbbf24; }
-  .t-state       { border-left: 3px solid #f472b6; }
-  .t-framework   { border-left: 3px solid #38bdf8; }
-  .t-runtime     { border-left: 3px solid #818cf8; }
-  .t-security    { border-left: 3px solid #34d399; }
-  .t-data        { border-left: 3px solid #2dd4bf; }
-  .t-ai          { border-left: 3px solid #a78bfa; }
-  .t-infra       { border-left: 3px solid #94a3b8; }
-  .t-tooling     { border-left: 3px solid #f59e0b; }
-
-  /* ============ CONNECTION DIAGRAM ============ */
-  .flow {
+  .zones {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 16px;
-    margin-top: 8px;
+    position: relative;
   }
-  .col {
-    background: var(--card);
+  .zone {
+    background: var(--bg-soft);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 18px;
+    padding: 16px;
+    min-height: 240px;
+    position: relative;
   }
-  .col-head {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
+  .zone-head {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed var(--border);
+    display: flex; align-items: center; gap: 6px;
   }
-  .col-head .num {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
-    background: linear-gradient(135deg, #fb7185, #fbbf24);
-    color: white;
-  }
-  .col-head h3 { font-size: 14px; font-weight: 700; }
-  .col-head small { display: block; font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+  .z-client .zone-head { color: #fda4af; }
+  .z-edge .zone-head   { color: #fcd34d; }
+  .z-server .zone-head { color: #7dd3fc; }
+  .z-data .zone-head   { color: #6ee7b7; }
 
-  .pkg {
-    background: var(--bg-soft);
+  .box {
+    background: var(--card-hi);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
     margin-bottom: 8px;
+    transition: border-color .15s;
   }
-  .pkg:last-child { margin-bottom: 0; }
-  .pkg-name {
-    font-size: 12px; font-weight: 700;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .pkg-ver {
-    font-size: 10px; color: var(--dim);
-    background: rgba(255,255,255,.04);
-    padding: 2px 6px; border-radius: 4px;
-  }
-  .pkg-desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .box:hover { border-color: var(--border-hi); }
+  .box-name { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .box-name .ico { font-size: 14px; }
+  .box-sub { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
-  /* ============ FLOW LINE ============ */
-  .pipeline {
+  .arrow-row {
+    display: flex; justify-content: center; align-items: center;
+    margin: 12px 0;
+    color: var(--dim);
+    font-size: 12px;
+    gap: 6px;
+  }
+  .arrow-row .line { flex: 1; border-top: 1px dashed var(--border); }
+  .arrow-row .label {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--bg-soft);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* ============ SEQUENCE DIAGRAM ============ */
+  .seq {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 22px;
     overflow-x: auto;
   }
-  .pipeline-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 720px;
+  .seq-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
   }
-  .p-node {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    flex: 1;
-    text-align: center;
+  .seq-title .badge-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
   }
-  .p-node .ico { font-size: 18px; }
-  .p-node .name { font-size: 12px; font-weight: 700; margin-top: 6px; }
-  .p-node .tech-mini { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: ui-monospace, monospace; }
-  .p-arrow { color: var(--dim); font-size: 18px; flex-shrink: 0; }
+  .seq-desc { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
 
-  /* version chips */
-  .vers-grid {
+  .lanes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    min-width: 900px;
+    position: relative;
   }
-  .vers {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 8px;
-  }
-  .vers .lname { font-size: 12px; font-weight: 600; }
-  .vers .lver {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  .lane-head {
+    text-align: center;
+    padding: 10px 8px;
     font-size: 11px;
-    background: rgba(56,189,248,.1);
-    color: #7dd3fc;
-    padding: 3px 8px; border-radius: 5px;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text);
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    border-radius: 8px;
+    margin: 0 4px;
   }
+  .lane-head small {
+    display: block;
+    font-size: 9px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 3px;
+    font-family: ui-monospace, monospace;
+  }
+
+  .lane-body {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    position: relative;
+    padding: 18px 0 8px;
+  }
+  .lane-body::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: calc(100% / 12);
+    width: 1px;
+    background: var(--border);
+  }
+  .lane-body .vline {
+    border-left: 1px dashed var(--border);
+    min-height: 100%;
+    margin: 0 auto;
+  }
+
+  .step {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    align-items: center;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .step-arrow {
+    height: 28px;
+    display: flex; align-items: center;
+    background: linear-gradient(90deg, transparent 0%, var(--bg-soft) 8%, var(--bg-soft) 92%, transparent 100%);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    padding: 0 10px;
+    font-size: 11px;
+    color: var(--text);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    position: relative;
+  }
+  .step-arrow::after {
+    content: "";
+    position: absolute;
+    right: -1px; top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid var(--border-hi);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+  }
+  .step-arrow.rev::after { display: none; }
+  .step-arrow.rev::before {
+    content: "";
+    position: absolute;
+    left: -1px; top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-right: 8px solid var(--border-hi);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+  }
+  .step-arrow .num {
+    font-size: 10px;
+    background: var(--card);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-right: 8px;
+    color: var(--muted);
+  }
+  .step-arrow.rose { border-color: rgba(244,63,94,.4); background: linear-gradient(90deg, transparent, rgba(244,63,94,.08) 50%, transparent); }
+  .step-arrow.amber { border-color: rgba(245,158,11,.4); background: linear-gradient(90deg, transparent, rgba(245,158,11,.08) 50%, transparent); }
+  .step-arrow.sky { border-color: rgba(56,189,248,.4); background: linear-gradient(90deg, transparent, rgba(56,189,248,.08) 50%, transparent); }
+  .step-arrow.emerald { border-color: rgba(16,185,129,.4); background: linear-gradient(90deg, transparent, rgba(16,185,129,.08) 50%, transparent); }
+  .step-arrow.violet { border-color: rgba(167,139,250,.4); background: linear-gradient(90deg, transparent, rgba(167,139,250,.08) 50%, transparent); }
+
+  /* ============ LEGEND ============ */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Compact intro card */
+  .intro {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 8px;
+    display: flex; gap: 16px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .intro-text { flex: 1; min-width: 280px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .intro-text strong { color: var(--text); font-weight: 700; }
 
   @media (max-width: 920px) {
-    .flow { grid-template-columns: 1fr; }
-    .tier { grid-template-columns: 1fr; gap: 10px; }
+    .zones { grid-template-columns: 1fr; }
     h1 { font-size: 26px; }
   }
 </style>
@@ -244,274 +292,299 @@
 
   <header>
     <div class="badge">◆ ARGOS · SOGRA Hackathon 2026</div>
-    <h1>Tech Stack Architecture</h1>
-    <p class="subtitle">SOGRA · 로컬 선물 오마카세 · 기술 스택 구조도</p>
+    <h1>Data Flow Architecture</h1>
+    <p class="subtitle">요청이 어디를 거쳐 어떤 데이터를 가지러 가는가</p>
   </header>
 
-  <!-- ============ TIER STACK ============ -->
-  <h2><span class="accent"></span>레이어별 기술 스택 <span class="small">— 위 = 사용자 가까운 쪽</span></h2>
+  <div class="intro">
+    <div class="intro-text">
+      이 다이어그램은 사용자가 SOGRA 페이지에 들어와서 클릭했을 때 <strong>요청이 거치는 모든 경유지</strong>를 보여줍니다.
+      Browser → Vercel Edge → Middleware → Next.js Server → Supabase/Claude API 순으로 흐르며,
+      각 노드에서 어떤 데이터가 어떻게 변환되는지 표시합니다.
+    </div>
+  </div>
 
-  <div class="stack">
+  <!-- ============ SYSTEM MAP (HORIZONTAL ZONES) ============ -->
+  <h2>
+    <span class="accent"></span>전체 시스템 맵 <span class="tag">데이터 경유지</span>
+  </h2>
 
-    <!-- Presentation -->
-    <div class="tier t-presentation">
-      <div class="tier-label">
-        <span class="tier-icon">🎨</span>
-        <div class="tier-name">Presentation<small>UI / 스타일링</small></div>
+  <div class="system">
+    <div class="zones">
+
+      <!-- ZONE 1 : CLIENT -->
+      <div class="zone z-client">
+        <div class="zone-head">① Client · 브라우저</div>
+        <div class="box">
+          <div class="box-name"><span class="ico">⚛️</span>React Server Components</div>
+          <div class="box-sub">app/page.tsx · /products · /product/[id]</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🖱️</span>Client Components</div>
+          <div class="box-sub">RecommendForm · AddToCartButton · LoginForm</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🐻</span>Zustand Store</div>
+          <div class="box-sub">cart (localStorage persist)</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🍪</span>Cookies</div>
+          <div class="box-sub">sb-access-token · sb-refresh-token · csrf</div>
+        </div>
       </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">🌬️</span>Tailwind CSS <span class="v">v4</span></span>
-        <span class="tech"><span class="ico">✨</span>tw-animate-css <span class="v">1.4</span></span>
-        <span class="tech"><span class="ico">🎯</span>tailwind-merge <span class="v">3.6</span></span>
-        <span class="tech"><span class="ico">🔧</span>clsx <span class="v">2.1</span></span>
-        <span class="tech"><span class="ico">🍞</span>sonner <span class="v">2.0</span></span>
-        <span class="tech"><span class="ico">🖼️</span>lucide-react <span class="v">1.16</span></span>
-        <span class="tech"><span class="ico">🌗</span>next-themes <span class="v">0.4</span></span>
+
+      <!-- ZONE 2 : EDGE / MIDDLEWARE -->
+      <div class="zone z-edge">
+        <div class="zone-head">② Edge · 모든 요청 가로채기</div>
+        <div class="box">
+          <div class="box-name"><span class="ico">▲</span>Vercel Edge Network</div>
+          <div class="box-sub">CDN · Geo-routing</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🛂</span>middleware.ts</div>
+          <div class="box-sub">모든 요청 matcher 통과</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🔄</span>updateSession()</div>
+          <div class="box-sub">@supabase/ssr · 쿠키 갱신</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🛡️</span>ensureCsrfCookie()</div>
+          <div class="box-sub">double-submit 토큰 발급</div>
+        </div>
+      </div>
+
+      <!-- ZONE 3 : SERVER / API -->
+      <div class="zone z-server">
+        <div class="zone-head">③ Server · Next.js 백엔드</div>
+        <div class="box">
+          <div class="box-name"><span class="ico">⚡</span>Route Handlers</div>
+          <div class="box-sub">app/api/**/route.ts (Node 24)</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">✅</span>Zod 검증</div>
+          <div class="box-sub">body schema parse</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🔐</span>Security Guard</div>
+          <div class="box-sub">csrf · rbac · sanitize · ssrf · bruteforce</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🧰</span>createClient() (server)</div>
+          <div class="box-sub">lib/supabase/server.ts</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🤖</span>anthropic.messages.create</div>
+          <div class="box-sub">lib/anthropic.ts</div>
+        </div>
+      </div>
+
+      <!-- ZONE 4 : DATA / EXTERNAL -->
+      <div class="zone z-data">
+        <div class="zone-head">④ Data · 외부 서비스</div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🗄️</span>Supabase Postgres</div>
+          <div class="box-sub">RLS 검사 → products / orders / reviews</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🔐</span>Supabase Auth</div>
+          <div class="box-sub">auth.users · JWT 발급</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">📦</span>Supabase Storage</div>
+          <div class="box-sub">이미지 버킷</div>
+        </div>
+        <div class="box">
+          <div class="box-name"><span class="ico">🌟</span>Anthropic API</div>
+          <div class="box-sub">claude-opus-4-7 · JSON 응답</div>
+        </div>
       </div>
     </div>
 
-    <!-- UI Components -->
-    <div class="tier t-ui">
-      <div class="tier-label">
-        <span class="tier-icon">🧩</span>
-        <div class="tier-name">UI Components<small>shadcn/ui</small></div>
-      </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">📦</span>shadcn <span class="v">4.8</span></span>
-        <span class="tech"><span class="ico">⚛️</span>@base-ui/react <span class="v">1.5</span></span>
-        <span class="tech"><span class="ico">🎭</span>class-variance-authority <span class="v">0.7</span></span>
-        <span class="tech">Button · Card · Dialog · Sheet</span>
-        <span class="tech">Tabs · Table · Select · Avatar</span>
-        <span class="tech">Dropdown · Textarea · Input</span>
-      </div>
+    <!-- arrows between zones -->
+    <div class="arrow-row" style="margin-top:18px;">
+      <span class="line"></span>
+      <span class="label">HTTPS Request →</span>
+      <span class="line"></span>
+      <span class="label">→ Session/CSRF 부착 →</span>
+      <span class="line"></span>
+      <span class="label">→ Validated Query/Prompt →</span>
+      <span class="line"></span>
+    </div>
+    <div class="arrow-row">
+      <span class="line"></span>
+      <span class="label">← JSON Data ←</span>
+      <span class="line"></span>
+      <span class="label">← Sanitized Response ←</span>
+      <span class="line"></span>
+      <span class="label">← Rows / GiftSet[3] ←</span>
+      <span class="line"></span>
     </div>
 
-    <!-- State -->
-    <div class="tier t-state">
-      <div class="tier-label">
-        <span class="tier-icon">🧠</span>
-        <div class="tier-name">State / Validation<small>Client-side</small></div>
-      </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">🐻</span>Zustand <span class="v">5.0</span></span>
-        <span class="tech"><span class="ico">✅</span>Zod <span class="v">4.4</span></span>
-        <span class="tech">cart store (localStorage persist)</span>
-      </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#fb7185"></span>Client</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span>Edge / Middleware</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#38bdf8"></span>Server / API</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#34d399"></span>External (Supabase / Claude)</div>
+    </div>
+  </div>
+
+  <!-- ============ SCENARIO 1 : AI RECOMMEND ============ -->
+  <h2><span class="accent"></span>시나리오 ① AI 선물 추천 <span class="tag">POST /api/recommend</span></h2>
+  <div class="seq">
+    <div class="seq-title">
+      <span class="badge-num" style="background:linear-gradient(135deg,#a78bfa,#fb7185)">A</span>
+      예산·취향 입력 → Claude 큐레이션 → 3개 GiftSet 반환
+    </div>
+    <div class="seq-desc">유저가 RecommendForm에 입력한 정보가 Claude까지 도달했다가, 상품 데이터와 함께 돌아오는 전체 경로.</div>
+
+    <div class="lanes">
+      <div class="lane-head">👤 User<small>브라우저</small></div>
+      <div class="lane-head">⚛️ React<small>RecommendForm</small></div>
+      <div class="lane-head">▲ Vercel Edge<small>middleware.ts</small></div>
+      <div class="lane-head">⚡ Route Handler<small>/api/recommend</small></div>
+      <div class="lane-head">🗄️ Supabase<small>products 테이블</small></div>
+      <div class="lane-head">🤖 Claude API<small>opus-4-7</small></div>
     </div>
 
-    <!-- Framework -->
-    <div class="tier t-framework">
-      <div class="tier-label">
-        <span class="tier-icon">⚡</span>
-        <div class="tier-name">Framework<small>풀스택 코어</small></div>
+    <div class="lane-body">
+      <div class="step">
+        <div class="step-arrow rose" style="grid-column: 1 / 3;">
+          <span class="num">1</span> submit({budget, target, vibe})
+        </div>
       </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">▲</span>Next.js <span class="v">16.2.6 (App Router)</span></span>
-        <span class="tech"><span class="ico">⚛️</span>React <span class="v">19.2.4</span></span>
-        <span class="tech"><span class="ico">⚛️</span>React DOM <span class="v">19.2.4</span></span>
-        <span class="tech">Server Components</span>
-        <span class="tech">Route Handlers</span>
-        <span class="tech">Middleware (Edge)</span>
-        <span class="tech">Server Actions</span>
+      <div class="step">
+        <div class="step-arrow amber" style="grid-column: 2 / 4;">
+          <span class="num">2</span> fetch POST + cookies + csrf 헤더
+        </div>
       </div>
-    </div>
-
-    <!-- Runtime -->
-    <div class="tier t-runtime">
-      <div class="tier-label">
-        <span class="tier-icon">⚙️</span>
-        <div class="tier-name">Runtime / Language<small>실행 환경</small></div>
+      <div class="step">
+        <div class="step-arrow amber" style="grid-column: 3 / 5;">
+          <span class="num">3</span> updateSession → CSRF 검증 → forward
+        </div>
       </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">📘</span>TypeScript <span class="v">^5</span></span>
-        <span class="tech"><span class="ico">🟢</span>Node.js <span class="v">24 LTS</span></span>
-        <span class="tech"><span class="ico">⚡</span>Vercel Fluid Compute</span>
-        <span class="tech"><span class="ico">🌐</span>Edge Runtime (middleware)</span>
+      <div class="step">
+        <div class="step-arrow sky" style="grid-column: 4 / 6;">
+          <span class="num">4</span> Zod parse → supabase.from('products').select(...)
+        </div>
       </div>
-    </div>
-
-    <!-- Security -->
-    <div class="tier t-security">
-      <div class="tier-label">
-        <span class="tier-icon">🛡️</span>
-        <div class="tier-name">Security<small>7중 가드</small></div>
+      <div class="step">
+        <div class="step-arrow emerald rev" style="grid-column: 4 / 6;">
+          <span class="num">5</span> ← RLS 통과한 products[] 반환
+        </div>
       </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">🧼</span>isomorphic-dompurify <span class="v">3.14</span></span>
-        <span class="tech">CSRF (double-submit)</span>
-        <span class="tech">RBAC (role guard)</span>
-        <span class="tech">SSRF (allowlist)</span>
-        <span class="tech">Upload validator</span>
-        <span class="tech">BruteForce limiter</span>
-        <span class="tech">RLS (Postgres)</span>
+      <div class="step">
+        <div class="step-arrow violet" style="grid-column: 4 / 7;">
+          <span class="num">6</span> prompt + products → anthropic.messages.create
+        </div>
       </div>
-    </div>
-
-    <!-- Data -->
-    <div class="tier t-data">
-      <div class="tier-label">
-        <span class="tier-icon">🗄️</span>
-        <div class="tier-name">Data Layer<small>Supabase</small></div>
+      <div class="step">
+        <div class="step-arrow violet rev" style="grid-column: 4 / 7;">
+          <span class="num">7</span> ← Claude JSON (GiftSet × 3)
+        </div>
       </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">⚡</span>@supabase/supabase-js <span class="v">2.106</span></span>
-        <span class="tech"><span class="ico">🔄</span>@supabase/ssr <span class="v">0.10</span></span>
-        <span class="tech"><span class="ico">🐘</span>Postgres + RLS</span>
-        <span class="tech"><span class="ico">🔐</span>Supabase Auth</span>
-        <span class="tech"><span class="ico">📦</span>Supabase Storage</span>
+      <div class="step">
+        <div class="step-arrow sky rev" style="grid-column: 2 / 5;">
+          <span class="num">8</span> ← NextResponse.json({sets})
+        </div>
       </div>
-    </div>
-
-    <!-- AI -->
-    <div class="tier t-ai">
-      <div class="tier-label">
-        <span class="tier-icon">🤖</span>
-        <div class="tier-name">AI Layer<small>Anthropic</small></div>
-      </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">🧬</span>@anthropic-ai/sdk <span class="v">0.98</span></span>
-        <span class="tech"><span class="ico">🌟</span>Claude Opus 4.7 <span class="v">claude-opus-4-7</span></span>
-        <span class="tech">Tool use · JSON output</span>
-        <span class="tech">GiftSet 큐레이션</span>
-      </div>
-    </div>
-
-    <!-- Infra -->
-    <div class="tier t-infra">
-      <div class="tier-label">
-        <span class="tier-icon">☁️</span>
-        <div class="tier-name">Infra / Hosting<small>배포</small></div>
-      </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">▲</span>Vercel (Fluid Compute)</span>
-        <span class="tech"><span class="ico">🌍</span>Edge Network · CDN</span>
-        <span class="tech"><span class="ico">🖼️</span>next/image · Unsplash · Pixabay · Supabase</span>
-      </div>
-    </div>
-
-    <!-- Tooling -->
-    <div class="tier t-tooling">
-      <div class="tier-label">
-        <span class="tier-icon">🔧</span>
-        <div class="tier-name">Dev Tooling<small>개발 환경</small></div>
-      </div>
-      <div class="tier-techs">
-        <span class="tech"><span class="ico">📦</span>npm</span>
-        <span class="tech"><span class="ico">🔍</span>ESLint <span class="v">^9</span></span>
-        <span class="tech"><span class="ico">🎨</span>PostCSS</span>
-        <span class="tech"><span class="ico">📘</span>@types/react · @types/node</span>
-        <span class="tech"><span class="ico">⚙️</span>Turbopack (built-in)</span>
+      <div class="step">
+        <div class="step-arrow rose rev" style="grid-column: 1 / 3;">
+          <span class="num">9</span> ← router.push('/recommend') · GiftSetCard 렌더
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ============ THREE-COLUMN MAP ============ -->
-  <h2><span class="accent"></span>3-Tier 패키지 매핑</h2>
+  <!-- ============ SCENARIO 2 : LOGIN ============ -->
+  <h2><span class="accent"></span>시나리오 ② 로그인 <span class="tag">POST /api/auth/login</span></h2>
+  <div class="seq">
+    <div class="seq-title">
+      <span class="badge-num" style="background:linear-gradient(135deg,#fb7185,#fbbf24)">B</span>
+      이메일/패스워드 → BruteForce 가드 → JWT 쿠키 발급
+    </div>
+    <div class="seq-desc">로그인 시도가 어떻게 차단/통과되고, 세션 쿠키가 어떻게 브라우저에 박히는지.</div>
 
-  <div class="flow">
-
-    <div class="col">
-      <div class="col-head">
-        <span class="num">1</span>
-        <div><h3>Client (브라우저)</h3><small>RSC + Client Components</small></div>
-      </div>
-      <div class="pkg"><div class="pkg-name">react <span class="pkg-ver">19.2.4</span></div><div class="pkg-desc">UI 렌더링 (Server + Client Components)</div></div>
-      <div class="pkg"><div class="pkg-name">next <span class="pkg-ver">16.2.6</span></div><div class="pkg-desc">App Router · 라우팅 · 코드 스플리팅</div></div>
-      <div class="pkg"><div class="pkg-name">zustand <span class="pkg-ver">5.0.13</span></div><div class="pkg-desc">전역 cart store · persist 미들웨어</div></div>
-      <div class="pkg"><div class="pkg-name">tailwindcss <span class="pkg-ver">^4</span></div><div class="pkg-desc">유틸리티 우선 스타일링</div></div>
-      <div class="pkg"><div class="pkg-name">@base-ui/react + shadcn <span class="pkg-ver">1.5 / 4.8</span></div><div class="pkg-desc">접근성 보장된 헤드리스 컴포넌트</div></div>
-      <div class="pkg"><div class="pkg-name">zod <span class="pkg-ver">4.4.3</span></div><div class="pkg-desc">폼 + API 입력 스키마 검증</div></div>
-      <div class="pkg"><div class="pkg-name">sonner <span class="pkg-ver">2.0.7</span></div><div class="pkg-desc">Toast 알림</div></div>
+    <div class="lanes">
+      <div class="lane-head">👤 User<small>LoginForm</small></div>
+      <div class="lane-head">▲ Edge<small>middleware</small></div>
+      <div class="lane-head">⚡ Route Handler<small>/api/auth/login</small></div>
+      <div class="lane-head">🛡️ Security<small>bruteforce.ts</small></div>
+      <div class="lane-head">🗄️ Postgres<small>login_attempts</small></div>
+      <div class="lane-head">🔐 Supabase Auth<small>auth.users</small></div>
     </div>
 
-    <div class="col">
-      <div class="col-head">
-        <span class="num">2</span>
-        <div><h3>Server (Next API)</h3><small>Route Handlers · Middleware</small></div>
-      </div>
-      <div class="pkg"><div class="pkg-name">next/server <span class="pkg-ver">16.2.6</span></div><div class="pkg-desc">Route Handlers · NextResponse · cookies()</div></div>
-      <div class="pkg"><div class="pkg-name">@supabase/ssr <span class="pkg-ver">0.10.3</span></div><div class="pkg-desc">서버에서 쿠키 기반 Supabase 세션 관리</div></div>
-      <div class="pkg"><div class="pkg-name">@anthropic-ai/sdk <span class="pkg-ver">0.98.0</span></div><div class="pkg-desc">Claude Opus 4.7 호출 · JSON 응답 파싱</div></div>
-      <div class="pkg"><div class="pkg-name">isomorphic-dompurify <span class="pkg-ver">3.14</span></div><div class="pkg-desc">서버측 XSS sanitize (리뷰/설명)</div></div>
-      <div class="pkg"><div class="pkg-name">zod <span class="pkg-ver">4.4.3</span></div><div class="pkg-desc">Request body 스키마 검증</div></div>
-      <div class="pkg"><div class="pkg-name">lib/security/*</div><div class="pkg-desc">csrf · rbac · ssrf · upload · bruteforce</div></div>
-    </div>
-
-    <div class="col">
-      <div class="col-head">
-        <span class="num">3</span>
-        <div><h3>External Services</h3><small>Managed / SaaS</small></div>
-      </div>
-      <div class="pkg"><div class="pkg-name">Supabase Postgres</div><div class="pkg-desc">7 테이블 · RLS · GIN index (tags)</div></div>
-      <div class="pkg"><div class="pkg-name">Supabase Auth</div><div class="pkg-desc">이메일/패스워드 · auth.users 트리거</div></div>
-      <div class="pkg"><div class="pkg-name">Supabase Storage</div><div class="pkg-desc">상품 이미지 업로드 버킷</div></div>
-      <div class="pkg"><div class="pkg-name">Anthropic API</div><div class="pkg-desc">claude-opus-4-7 모델</div></div>
-      <div class="pkg"><div class="pkg-name">Vercel</div><div class="pkg-desc">Fluid Compute · CDN · Edge Middleware</div></div>
-      <div class="pkg"><div class="pkg-name">SBA 상가정보 API <span class="pkg-ver">선택</span></div><div class="pkg-desc">소상공인 가게 데이터 (옵션)</div></div>
+    <div class="lane-body">
+      <div class="step"><div class="step-arrow rose" style="grid-column: 1 / 3;"><span class="num">1</span> POST {email, password} + csrf</div></div>
+      <div class="step"><div class="step-arrow amber" style="grid-column: 2 / 4;"><span class="num">2</span> CSRF 검증 통과 → forward</div></div>
+      <div class="step"><div class="step-arrow sky" style="grid-column: 3 / 5;"><span class="num">3</span> isLockedOut(email) 호출</div></div>
+      <div class="step"><div class="step-arrow emerald" style="grid-column: 4 / 6;"><span class="num">4</span> select count where attempted_at &gt; now()-5m</div></div>
+      <div class="step"><div class="step-arrow emerald rev" style="grid-column: 4 / 6;"><span class="num">5</span> ← attempts &lt; 5 → OK</div></div>
+      <div class="step"><div class="step-arrow violet" style="grid-column: 3 / 7;"><span class="num">6</span> supabase.auth.signInWithPassword</div></div>
+      <div class="step"><div class="step-arrow violet rev" style="grid-column: 3 / 7;"><span class="num">7</span> ← session + JWT</div></div>
+      <div class="step"><div class="step-arrow emerald" style="grid-column: 3 / 6;"><span class="num">8</span> insert login_attempts(success=true)</div></div>
+      <div class="step"><div class="step-arrow sky rev" style="grid-column: 2 / 4;"><span class="num">9</span> ← Set-Cookie: sb-access-token (HttpOnly)</div></div>
+      <div class="step"><div class="step-arrow rose rev" style="grid-column: 1 / 3;"><span class="num">10</span> ← 200 → router.refresh()</div></div>
     </div>
   </div>
 
-  <!-- ============ DATA FLOW PIPELINE ============ -->
-  <h2><span class="accent"></span>요청 한 사이클 · 데이터 파이프라인</h2>
-  <div class="pipeline">
-    <div class="pipeline-row">
-      <div class="p-node">
-        <div class="ico">🌐</div>
-        <div class="name">Browser</div>
-        <div class="tech-mini">React 19 · RSC</div>
-      </div>
-      <div class="p-arrow">→</div>
-      <div class="p-node">
-        <div class="ico">▲</div>
-        <div class="name">Vercel Edge</div>
-        <div class="tech-mini">middleware.ts</div>
-      </div>
-      <div class="p-arrow">→</div>
-      <div class="p-node">
-        <div class="ico">🛡️</div>
-        <div class="name">Security</div>
-        <div class="tech-mini">CSRF · Session · RBAC</div>
-      </div>
-      <div class="p-arrow">→</div>
-      <div class="p-node">
-        <div class="ico">⚡</div>
-        <div class="name">Route Handler</div>
-        <div class="tech-mini">Next 16 · Node 24</div>
-      </div>
-      <div class="p-arrow">→</div>
-      <div class="p-node">
-        <div class="ico">🗄️</div>
-        <div class="name">Supabase</div>
-        <div class="tech-mini">Postgres + RLS</div>
-      </div>
-      <div class="p-arrow">→</div>
-      <div class="p-node">
-        <div class="ico">🤖</div>
-        <div class="name">Claude API</div>
-        <div class="tech-mini">opus-4-7</div>
-      </div>
+  <!-- ============ SCENARIO 3 : ORDER ============ -->
+  <h2><span class="accent"></span>시나리오 ③ 주문 생성 <span class="tag">POST /api/orders</span></h2>
+  <div class="seq">
+    <div class="seq-title">
+      <span class="badge-num" style="background:linear-gradient(135deg,#34d399,#38bdf8)">C</span>
+      장바구니(Zustand) → 주문 트랜잭션 → 재고 감소
+    </div>
+    <div class="seq-desc">cart store의 아이템이 어떻게 orders + order_items에 저장되는지.</div>
+
+    <div class="lanes">
+      <div class="lane-head">👤 User<small>/cart</small></div>
+      <div class="lane-head">🐻 Zustand<small>cart store</small></div>
+      <div class="lane-head">▲ Edge<small>middleware</small></div>
+      <div class="lane-head">⚡ Route Handler<small>/api/orders</small></div>
+      <div class="lane-head">🗄️ Postgres<small>orders + order_items</small></div>
+      <div class="lane-head">🛡️ RLS<small>buyer_id check</small></div>
+    </div>
+
+    <div class="lane-body">
+      <div class="step"><div class="step-arrow rose" style="grid-column: 1 / 3;"><span class="num">1</span> "주문하기" 클릭 → useCart.getItems()</div></div>
+      <div class="step"><div class="step-arrow amber" style="grid-column: 2 / 4;"><span class="num">2</span> POST {items[]} + session cookie</div></div>
+      <div class="step"><div class="step-arrow amber" style="grid-column: 3 / 5;"><span class="num">3</span> updateSession → user 식별</div></div>
+      <div class="step"><div class="step-arrow sky" style="grid-column: 4 / 6;"><span class="num">4</span> Zod 검증 → insert orders(buyer_id=user.id)</div></div>
+      <div class="step"><div class="step-arrow emerald" style="grid-column: 5 / 7;"><span class="num">5</span> RLS: buyer_id == auth.uid() ✓</div></div>
+      <div class="step"><div class="step-arrow sky" style="grid-column: 4 / 6;"><span class="num">6</span> insert order_items[] · update stock</div></div>
+      <div class="step"><div class="step-arrow sky rev" style="grid-column: 2 / 5;"><span class="num">7</span> ← {order_id} + cart.clear()</div></div>
+      <div class="step"><div class="step-arrow rose rev" style="grid-column: 1 / 3;"><span class="num">8</span> ← redirect /orders/[id]</div></div>
     </div>
   </div>
 
-  <!-- ============ VERSION TABLE ============ -->
-  <h2><span class="accent"></span>주요 패키지 버전 한눈에 보기</h2>
-  <div class="vers-grid">
-    <div class="vers"><span class="lname">next</span><span class="lver">16.2.6</span></div>
-    <div class="vers"><span class="lname">react / react-dom</span><span class="lver">19.2.4</span></div>
-    <div class="vers"><span class="lname">typescript</span><span class="lver">^5</span></div>
-    <div class="vers"><span class="lname">tailwindcss</span><span class="lver">^4</span></div>
-    <div class="vers"><span class="lname">@supabase/supabase-js</span><span class="lver">2.106.1</span></div>
-    <div class="vers"><span class="lname">@supabase/ssr</span><span class="lver">0.10.3</span></div>
-    <div class="vers"><span class="lname">@anthropic-ai/sdk</span><span class="lver">0.98.0</span></div>
-    <div class="vers"><span class="lname">zustand</span><span class="lver">5.0.13</span></div>
-    <div class="vers"><span class="lname">zod</span><span class="lver">4.4.3</span></div>
-    <div class="vers"><span class="lname">@base-ui/react</span><span class="lver">1.5.0</span></div>
-    <div class="vers"><span class="lname">shadcn</span><span class="lver">4.8.0</span></div>
-    <div class="vers"><span class="lname">isomorphic-dompurify</span><span class="lver">3.14.0</span></div>
-    <div class="vers"><span class="lname">sonner</span><span class="lver">2.0.7</span></div>
-    <div class="vers"><span class="lname">lucide-react</span><span class="lver">1.16.0</span></div>
-    <div class="vers"><span class="lname">next-themes</span><span class="lver">0.4.6</span></div>
-    <div class="vers"><span class="lname">eslint</span><span class="lver">^9</span></div>
+  <!-- ============ SCENARIO 4 : RSC INITIAL LOAD ============ -->
+  <h2><span class="accent"></span>시나리오 ④ 초기 페이지 로드 <span class="tag">GET /</span></h2>
+  <div class="seq">
+    <div class="seq-title">
+      <span class="badge-num" style="background:linear-gradient(135deg,#fbbf24,#34d399)">D</span>
+      Server Component가 직접 Supabase에서 데이터를 가져온다 (API 호출 없음)
+    </div>
+    <div class="seq-desc">RSC는 클라이언트 fetch 없이 서버에서 바로 DB를 조회해 HTML로 스트리밍.</div>
+
+    <div class="lanes">
+      <div class="lane-head">👤 User<small>브라우저</small></div>
+      <div class="lane-head">▲ Edge<small>middleware</small></div>
+      <div class="lane-head">⚛️ RSC<small>app/page.tsx</small></div>
+      <div class="lane-head">🧰 createClient<small>lib/supabase/server</small></div>
+      <div class="lane-head">🗄️ Postgres<small>products + stores</small></div>
+      <div class="lane-head">📦 Streamed HTML<small>→ Browser</small></div>
+    </div>
+
+    <div class="lane-body">
+      <div class="step"><div class="step-arrow rose" style="grid-column: 1 / 3;"><span class="num">1</span> GET / + 쿠키</div></div>
+      <div class="step"><div class="step-arrow amber" style="grid-column: 2 / 4;"><span class="num">2</span> session 갱신 → RSC 진입</div></div>
+      <div class="step"><div class="step-arrow sky" style="grid-column: 3 / 5;"><span class="num">3</span> getPopularProducts() 호출</div></div>
+      <div class="step"><div class="step-arrow emerald" style="grid-column: 4 / 6;"><span class="num">4</span> .from('products').select('*, store:stores(*)')</div></div>
+      <div class="step"><div class="step-arrow emerald rev" style="grid-column: 4 / 6;"><span class="num">5</span> ← rows (RLS 통과한 is_approved=true)</div></div>
+      <div class="step"><div class="step-arrow sky" style="grid-column: 3 / 7;"><span class="num">6</span> JSX 렌더 + ProductCard ×N</div></div>
+      <div class="step"><div class="step-arrow rose rev" style="grid-column: 1 / 7;"><span class="num">7</span> ← React Streaming HTML</div></div>
+    </div>
   </div>
 
 </div>

@@ -59,7 +59,7 @@ export default function LoginForm() {
           <Gift className="h-4 w-4" />
         </span>
         <div>
-          <h1 className="font-extrabold text-xl">사랑담은</h1>
+          <h1 className="font-extrabold text-xl">장터한상</h1>
           <p className="text-xs text-muted-foreground">로그인</p>
         </div>
       </div>

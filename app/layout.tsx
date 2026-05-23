@@ -11,7 +11,7 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "사랑담은 — 로컬 선물 오마카세",
+  title: "장터한상 — 로컬 선물 오마카세",
   description:
     "예산만 알려주세요. AI가 대전충청 소상공인 상품으로 마음을 담은 선물 세트를 만들어 드립니다.",
 };

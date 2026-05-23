@@ -76,7 +76,7 @@ export default function Navbar() {
             <Gift className="h-5 w-5" />
           </span>
           <div className="flex flex-col leading-tight">
-            <span className="font-extrabold text-lg tracking-tight">사랑담은</span>
+            <span className="font-extrabold text-lg tracking-tight">장터한상</span>
             <span className="text-[10px] text-muted-foreground -mt-0.5">
               로컬 선물 오마카세
             </span>

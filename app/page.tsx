@@ -124,7 +124,7 @@ export default async function HomePage() {
       <section className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <h2 className="text-2xl font-bold tracking-tight text-center">
-            왜 &quot;사랑담은&quot; 일까요?
+            왜 &quot;장터한상&quot; 일까요?
           </h2>
           <div className="grid gap-6 md:grid-cols-3 mt-10">
             {[
