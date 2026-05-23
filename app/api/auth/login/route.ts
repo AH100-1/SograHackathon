@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password: body.password,
   });
@@ -56,5 +56,13 @@ export async function POST(req: Request) {
   }
 
   await recordLoginAttempt(email, true, ip);
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    session: data.session
+      ? {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        }
+      : null,
+  });
 }

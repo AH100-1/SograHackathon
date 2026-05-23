@@ -57,5 +57,13 @@ export async function POST(req: Request) {
       );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    session: data.session
+      ? {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        }
+      : null,
+  });
 }

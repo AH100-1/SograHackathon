@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Gift, ShieldAlert } from "lucide-react";
 import { csrfFetch } from "@/lib/csrf-client";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function LoginForm() {
@@ -41,6 +42,11 @@ export default function LoginForm() {
           toast.error(data.error || "로그인 실패");
         }
         return;
+      }
+      // 서버에서 받은 세션을 클라이언트 supabase에 주입 → onAuthStateChange 발화 → Navbar 갱신
+      if (data.session) {
+        const sb = createClient();
+        await sb.auth.setSession(data.session);
       }
       toast.success("로그인 되었습니다");
       router.push(redirectTo);
