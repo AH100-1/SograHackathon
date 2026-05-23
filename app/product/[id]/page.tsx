@@ -1,4 +1,4 @@
-import Image from "next/image";
+import SafeImage from "@/components/safe-image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Store as StoreIcon, ArrowLeft, Package, Leaf } from "lucide-react";
@@ -56,16 +56,14 @@ export default async function ProductDetailPage({
       <div className="mt-6 grid gap-10 md:grid-cols-2">
         {/* ── 이미지 ── */}
         <div className="relative aspect-square overflow-hidden rounded-3xl border border-border bg-warm-gradient shadow-md">
-          {p.image_url && (
-            <Image
-              src={p.image_url}
-              alt={p.name}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
-          )}
+          <SafeImage
+            src={p.image_url}
+            alt={p.name}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
           <Leaf
             aria-hidden
             className="absolute top-4 left-4 h-6 w-6 text-white/80 drop-shadow"

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import SafeImage from "@/components/safe-image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -85,15 +85,13 @@ export default function GiftSetCard({
             className="flex items-center gap-3 rounded-xl p-2 hover:bg-accent transition-colors"
           >
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg ring-1 ring-border bg-warm-gradient">
-              {p.image_url && (
-                <Image
-                  src={p.image_url}
-                  alt={p.name}
-                  fill
-                  className="object-cover"
-                  sizes="56px"
-                />
-              )}
+              <SafeImage
+                src={p.image_url}
+                alt={p.name}
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold line-clamp-1 text-foreground">

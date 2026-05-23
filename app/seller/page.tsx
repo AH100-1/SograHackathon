@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/safe-image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Store, Plus, Package, MapPin, Leaf } from "lucide-react";
@@ -123,15 +123,13 @@ export default async function SellerPage() {
                     className="flex items-center gap-3 rounded-2xl border-border bg-card p-3 transition-shadow hover:shadow-md"
                   >
                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-warm-gradient ring-1 ring-border">
-                      {p.image_url && (
-                        <Image
-                          src={p.image_url}
-                          alt={p.name}
-                          fill
-                          sizes="64px"
-                          className="object-cover"
-                        />
-                      )}
+                      <SafeImage
+                        src={p.image_url}
+                        alt={p.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <Link
