@@ -79,6 +79,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
+  // 태그 화이트리스트: DB tags 테이블에 정의된 값만 허용
+  // 시그니처 태그(로컬/대전/전통시장)는 서버에서 자동 부여
+  const { data: tagRows } = await supabase
+    .from("tags")
+    .select("value, is_signature");
+
+  const userAllowed = new Set(
+    (tagRows ?? []).filter((t) => !t.is_signature).map((t) => t.value),
+  );
+  const signatures = (tagRows ?? [])
+    .filter((t) => t.is_signature)
+    .map((t) => t.value);
+
+  const validUserTags = body.tags.filter((t) => userAllowed.has(t));
+  const finalTags = Array.from(new Set([...signatures, ...validUserTags]));
+
   const { data, error } = await supabase
     .from("products")
     .insert({
@@ -87,7 +103,7 @@ export async function POST(req: Request) {
       price: body.price,
       stock: body.stock,
       image_url: body.image_url || null,
-      tags: body.tags.map((t) => stripHtml(t)),
+      tags: finalTags,
       description: sanitizeHtml(body.description),
       // 시연 편의상 자동 승인. 실제로는 false 로 두고 admin 승인 후 노출
       is_approved: true,

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gift, ShieldAlert } from "lucide-react";
+import { Gift } from "lucide-react";
 import { csrfFetch } from "@/lib/csrf-client";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -100,11 +100,6 @@ export default function LoginForm() {
         <Button type="submit" className="w-full" disabled={submitting || !!lockedUntil}>
           {submitting ? "로그인 중…" : "로그인"}
         </Button>
-
-        <div className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-          <ShieldAlert className="h-3.5 w-3.5 text-primary shrink-0" />
-          5회 실패 시 15분간 잠금 (BruteForce 방어)
-        </div>
 
         <p className="text-center text-sm text-muted-foreground">
           아직 계정이 없으신가요?{" "}

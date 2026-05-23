@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { csrfFetch } from "@/lib/csrf-client";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+type TagGroup = { key: string; label: string; tags: string[] };
+
+const MAX_TAGS = 8;
 
 export default function ProductCreateForm({ storeId }: { storeId: string }) {
   const router = useRouter();
@@ -16,8 +21,32 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
   const [price, setPrice] = useState(10000);
   const [stock, setStock] = useState(50);
   const [imageUrl, setImageUrl] = useState("");
-  const [tags, setTags] = useState("부모님,건강");
   const [description, setDescription] = useState("");
+  const [groups, setGroups] = useState<TagGroup[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set(["부모님", "건강"]));
+
+  useEffect(() => {
+    fetch("/api/tags")
+      .then((r) => r.json())
+      .then((d) => setGroups(d.groups ?? []))
+      .catch(() => {});
+  }, []);
+
+  function toggleTag(tag: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        if (next.size >= MAX_TAGS) {
+          toast.error(`태그는 최대 ${MAX_TAGS}개까지 선택할 수 있습니다`);
+          return prev;
+        }
+        next.add(tag);
+      }
+      return next;
+    });
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,10 +61,7 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
           price,
           stock,
           image_url: imageUrl || null,
-          tags: tags
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean),
+          tags: Array.from(selected),
           description,
         }),
       });
@@ -49,7 +75,7 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
       setPrice(10000);
       setStock(50);
       setImageUrl("");
-      setTags("부모님,건강");
+      setSelected(new Set(["부모님", "건강"]));
       setDescription("");
       router.refresh();
     } catch (err: any) {
@@ -107,14 +133,51 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
           className="mt-1"
         />
       </div>
-      <div>
-        <Label className="text-xs">태그 (쉼표로 구분)</Label>
-        <Input
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          className="mt-1"
-        />
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs">
+            태그 <span className="text-muted-foreground">({selected.size}/{MAX_TAGS})</span>
+          </Label>
+          <span className="text-[10px] text-muted-foreground">
+            로컬 / 대전 / 전통시장은 자동 부여
+          </span>
+        </div>
+        <div className="space-y-2 rounded-md border bg-muted/30 p-2">
+          {groups.length === 0 ? (
+            <p className="text-xs text-muted-foreground">태그 목록 로드 중…</p>
+          ) : (
+            groups.map((g) => (
+              <div key={g.key}>
+                <div className="mb-1 text-[10px] font-medium text-muted-foreground">
+                  {g.label}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {g.tags.map((tag) => {
+                    const on = selected.has(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className={cn(
+                          "rounded-full border px-2 py-0.5 text-xs transition-colors",
+                          on
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-input bg-background hover:bg-accent",
+                        )}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
+
       <div>
         <Label className="text-xs">설명</Label>
         <Textarea
