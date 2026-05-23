@@ -123,6 +123,9 @@ export default function Navbar() {
                   {user.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/mypage")}>
+                  <UserIcon className="mr-2 h-4 w-4" /> 마이페이지 설정
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/cart")}>
                   내 장바구니
                 </DropdownMenuItem>
