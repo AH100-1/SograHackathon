@@ -61,7 +61,7 @@ async function Results({
           AI 추천 중 문제가 발생했습니다.
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          ({error}) — Anthropic API 키와 시드 데이터를 확인해주세요.
+          ({error}) — Gemini API 키와 시드 데이터를 확인해주세요.
         </p>
         <Link
           href="/"
