@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Store as StoreIcon, ArrowLeft, ShieldCheck } from "lucide-react";
+import { MapPin, Store as StoreIcon, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
@@ -137,10 +137,6 @@ export default async function ProductDetailPage({
             </>
           )}
 
-          <div className="mt-6 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            모든 결제는 7중 보안 정책으로 보호됩니다
-          </div>
         </div>
       </div>
 

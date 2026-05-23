@@ -70,7 +70,7 @@ export default function ProductCreateForm({ storeId }: { storeId: string }) {
         toast.error(data.error || "등록 실패");
         return;
       }
-      toast.success("상품이 등록되었습니다");
+      toast.success("등록 완료 — 관리자 승인 후 노출됩니다");
       setName("");
       setPrice(10000);
       setStock(50);

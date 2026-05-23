@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, ShieldCheck, MapPin, ArrowRight, Store } from "lucide-react";
+import { Sparkles, Heart, MapPin, ArrowRight, Store } from "lucide-react";
 import RecommendForm from "@/components/recommend-form";
 import ProductCard from "@/components/product-card";
 import { createClient } from "@/lib/supabase/server";
@@ -77,10 +77,6 @@ export default async function HomePage() {
                   <Sparkles className="h-4 w-4 text-primary" />
                   Gemini AI 큐레이션
                 </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
-                  7중 보안
-                </div>
               </div>
             </div>
 
@@ -144,9 +140,9 @@ export default async function HomePage() {
                 icon: Store,
               },
               {
-                title: "안심하고 결제",
-                desc: "XSS·CSRF·SQLi 등 7대 보안 표준을 모두 적용했습니다.",
-                icon: ShieldCheck,
+                title: "받는 분께 바로 발송",
+                desc: "주문 즉시 사장님께 전달, 시장에서 갓 차려진 한 상 그대로.",
+                icon: Heart,
               },
             ].map((f) => (
               <div

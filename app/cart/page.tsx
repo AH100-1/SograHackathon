@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Trash2, Minus, Plus, ShoppingBag, ShieldCheck } from "lucide-react";
+import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/store/cart";
 import { csrfFetch } from "@/lib/csrf-client";
 import { toast } from "sonner";
@@ -156,10 +156,6 @@ export default function CartPage() {
             {placing ? "결제 중…" : "주문하기 (데모)"}
           </Button>
 
-          <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            CSRF 토큰으로 보호된 결제 요청
-          </div>
         </Card>
       </div>
     </div>

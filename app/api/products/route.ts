@@ -115,8 +115,8 @@ export async function POST(req: Request) {
       image_url: finalImageUrl,
       tags: finalTags,
       description: sanitizeHtml(body.description),
-      // 시연 편의상 자동 승인. 실제로는 false 로 두고 admin 승인 후 노출
-      is_approved: true,
+      // 관리자 승인 후 노출 (등록 시점엔 대기 상태)
+      is_approved: false,
     })
     .select()
     .single();
