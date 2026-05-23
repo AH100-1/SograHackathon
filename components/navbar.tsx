@@ -121,17 +121,17 @@ export default function Navbar() {
                   {user.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/cart")}>
-                  내 장바구니
+                <DropdownMenuItem asChild>
+                  <Link href="/cart">내 장바구니</Link>
                 </DropdownMenuItem>
                 {(user.role === "seller" || user.role === "admin") && (
-                  <DropdownMenuItem onClick={() => router.push("/seller")}>
-                    셀러 센터
+                  <DropdownMenuItem asChild>
+                    <Link href="/seller">셀러 센터</Link>
                   </DropdownMenuItem>
                 )}
                 {user.role === "admin" && (
-                  <DropdownMenuItem onClick={() => router.push("/admin")}>
-                    관리자 페이지
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">관리자 페이지</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
