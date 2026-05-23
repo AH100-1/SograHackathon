@@ -98,22 +98,14 @@ function categoryOf(item) {
   return "식품·기타";
 }
 
-function tagsOf(item, category) {
-  const base = ["대전충청", "로컬"];
-  if (category.includes("한식")) base.push("전통", "부모님", "명절");
-  if (category.includes("과자")) base.push("간식", "달달함", "선물");
-  if (category.includes("차")) base.push("건강", "차", "부모님");
-  if (category.includes("전통")) base.push("전통", "특산물", "명절");
-  if (category.includes("공예")) base.push("공예", "기념일", "수제");
-  return [...new Set(base)];
-}
 
 function priceOf(category) {
   const ranges = {
     "식품·한식":  [15000, 45000],
     "식품·과자":  [8000,  25000],
-    "건강·차":    [12000, 35000],
-    "식품·전통":  [10000, 30000],
+    "음료·카페":  [12000, 35000],
+    "식품·외식":  [20000, 60000],
+    "식품·특산":  [10000, 30000],
     "공예":        [15000, 50000],
     "식품·기타":  [8000,  22000],
   };
@@ -124,8 +116,9 @@ function priceOf(category) {
 const IMAGE_POOL = {
   "식품·한식":  ["photo-1583224994076-ae9c4bb0e8e3", "photo-1604908554007-1aaf3e51b8d2"],
   "식품·과자":  ["photo-1558961363-fa8fdf82db35", "photo-1606312619070-d48b4c652a52", "photo-1605478371310-89f481d23080"],
-  "건강·차":    ["photo-1576092768241-dec231879fc3", "photo-1587049352846-4a222e784d38"],
-  "식품·전통":  ["photo-1597528380177-f23ea0bdb18b", "photo-1556910103-1c02745aae4d", "photo-1587049352846-4a222e784d38"],
+  "음료·카페":  ["photo-1495474472287-4d71bcdd2085", "photo-1509042239860-f550ce710b93", "photo-1576092768241-dec231879fc3"],
+  "식품·외식":  ["photo-1546069901-ba9599a7e63c", "photo-1565299624946-b28f40a0ae38"],
+  "식품·특산":  ["photo-1597528380177-f23ea0bdb18b", "photo-1556910103-1c02745aae4d"],
   "공예":        ["photo-1600857544200-b2f666a9a2ec", "photo-1605478371310-89f481d23080"],
   "식품·기타":  ["photo-1606312619070-d48b4c652a52", "photo-1558961363-fa8fdf82db35"],
 };
@@ -137,22 +130,36 @@ function imageOf(category) {
 
 function productNameOf(storeName, category) {
   const suffix = {
-    "식품·한식":  "정성 선물 세트",
-    "식품·과자":  "수제 과자 세트",
-    "건강·차":    "프리미엄 티 세트",
-    "식품·전통":  "전통 특산 세트",
+    "식품·한식":  "한식 도시락 세트",
+    "식품·과자":  "수제 과자 선물 세트",
+    "음료·카페":  "원두 & 핸드드립 세트",
+    "식품·외식":  "시그니처 디시 식권",
+    "식품·특산":  "지역 특산 선물 박스",
     "공예":        "장인 공예 컬렉션",
     "식품·기타":  "시그니처 선물 박스",
   };
   return `${storeName} ${suffix[category] || "선물 세트"}`;
 }
 
+function tagsOf(_item, category) {
+  const base = ["대전충청", "로컬"];
+  if (category === "식품·한식")  base.push("전통", "부모님", "명절");
+  if (category === "식품·과자")  base.push("간식", "달달함", "선물");
+  if (category === "음료·카페")  base.push("카페", "원두", "친구");
+  if (category === "식품·외식")  base.push("식사", "기념일", "외식");
+  if (category === "식품·특산")  base.push("전통", "특산물", "명절");
+  if (category === "공예")        base.push("공예", "기념일", "수제");
+  return [...new Set(base)];
+}
+
 function descOf(storeName, category, addr) {
+  const region = addr.split(" ").slice(0, 2).join(" ");
   const lines = {
-    "식품·한식":  `${addr.split(" ").slice(0,2).join(" ")}의 ${storeName}이 정성껏 준비한 한식 선물 세트. 명절·부모님 선물 추천.`,
+    "식품·한식":  `${region}의 ${storeName}이 정성껏 차려낸 한식 도시락. 부모님·명절 선물에 추천.`,
     "식품·과자":  `${storeName}에서 손수 만든 전통 과자. 갓 구워낸 식감과 자연 단맛.`,
-    "건강·차":    `${storeName}의 시그니처 차. 우려낼수록 깊어지는 풍미.`,
-    "식품·전통":  `${storeName}이 자랑하는 대전충청 특산물. 6개월 이상 자연 숙성한 진짜 맛.`,
+    "음료·카페":  `${storeName} 바리스타가 직접 로스팅한 원두와 핸드드립 도구 세트.`,
+    "식품·외식":  `${region}의 ${storeName}에서 사용 가능한 시그니처 메뉴 식권.`,
+    "식품·특산":  `${region}에서 자란 농산물로 만든 ${storeName}의 시그니처 특산품.`,
     "공예":        `${storeName} 장인의 손길이 담긴 수제 공예품. 단 하나뿐인 기념일 선물.`,
     "식품·기타":  `${storeName}의 로컬 시그니처. 대전충청 정성을 담아 보내드립니다.`,
   };
@@ -171,14 +178,11 @@ for (const spot of SPOTS) {
     const items = await fetchRadius(spot);
     let added = 0;
     for (const it of items) {
-      if (seen.has(it.bizesNo)) continue;
-
-      const fullCat = `${it.indsLclsNm} ${it.indsMclsNm} ${it.indsSclsNm}`;
-      if (EXCLUDE_KEYWORDS.some((k) => fullCat.includes(k))) continue;
-      if (!GIFT_KEYWORDS.some((k) => fullCat.includes(k))) continue;
+      if (seen.has(it.bizesId)) continue;
+      if (!shouldInclude(it)) continue;
       if (!it.bizesNm || !it.rdnmAdr || !it.lon || !it.lat) continue;
 
-      seen.add(it.bizesNo);
+      seen.add(it.bizesId);
       candidates.push(it);
       added++;
     }

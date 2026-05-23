@@ -45,11 +45,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 pt-14 pb-12 md:pt-20 md:pb-16">
           <div className="grid gap-10 md:grid-cols-[1.05fr_1fr] md:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-white/70 px-3 py-1 text-xs font-semibold text-primary backdrop-blur">
-                <Sparkles className="h-3.5 w-3.5" />
-                AI 큐레이션 베타 · 대전충청 한정
-              </div>
-              <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
+              <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
                 예산만 알려주세요.
                 <br />
                 <span className="bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">
@@ -129,8 +125,8 @@ export default async function HomePage() {
           <div className="grid gap-6 md:grid-cols-3 mt-10">
             {[
               {
-                title: "AI가 골라주는 선물",
-                desc: "예산·대상·취향만 입력하면 Claude AI가 세 가지 세트를 큐레이션합니다.",
+                title: "AI가 차려주는 선물 한 상",
+                desc: "예산·받는 분·자리만 알려주세요. Claude AI가 어울리는 세 가지 패키지를 직접 차려드립니다.",
                 icon: Sparkles,
               },
               {
