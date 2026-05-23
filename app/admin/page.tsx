@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShieldCheck, Users, Package, Store, AlertTriangle } from "lucide-react";
+import { Users, Package, Store, AlertTriangle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ProductApprovalTable from "@/components/admin/product-approval-table";
 
@@ -54,12 +54,9 @@ export default async function AdminPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex items-center gap-2 text-primary">
-        <ShieldCheck className="h-5 w-5" />
-        <h1 className="text-3xl font-extrabold tracking-tight">관리자 페이지</h1>
-      </div>
+      <h1 className="text-3xl font-extrabold tracking-tight">관리자 페이지</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        admin 역할만 접근 가능 (RBAC + Supabase RLS 이중 방어)
+        승인 대기 상품을 검토하고 노출 여부를 결정합니다.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
