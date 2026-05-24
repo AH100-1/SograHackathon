@@ -5,6 +5,7 @@ import { verifyCsrf } from "@/lib/security/csrf";
 import { sanitizeHtml, stripHtml } from "@/lib/security/sanitize";
 import { isUrlSafe } from "@/lib/security/ssrf";
 import { requireRole } from "@/lib/security/rbac";
+import { generateAndUploadImage } from "@/lib/gemini-image";
 import { fetchNaverImage } from "@/lib/naver-image";
 import { fetchPexelsImage } from "@/lib/pexels";
 
@@ -81,10 +82,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // 이미지 미입력 시 → Naver 한국어 검색 우선, fallback Pexels
+  // 이미지 미입력 시 →
+  //   1) Gemini Flash 이미지 생성 → Supabase Storage 업로드
+  //   2) 실패 시 Naver 한국어 검색
+  //   3) 그것도 실패 시 Pexels 영문 검색
   let finalImageUrl = body.image_url || null;
   if (!finalImageUrl) {
     finalImageUrl =
+      (await generateAndUploadImage(body.name, store.category)) ??
       (await fetchNaverImage(body.name, store.category)) ??
       (await fetchPexelsImage(body.name, store.category));
   }
