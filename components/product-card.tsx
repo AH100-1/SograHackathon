@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/safe-image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,13 @@ export default function ProductCard({ product }: { product: Product }) {
     <Card className="group overflow-hidden rounded-2xl border-border/70 bg-card p-0 gap-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-maple/30">
       <Link href={`/product/${product.id}`} className="block">
         <div className="relative aspect-square w-full overflow-hidden bg-warm-gradient">
-          {product.image_url && (
-            <Image
-              src={product.image_url}
-              alt={product.name}
-              fill
-              sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          )}
+          <SafeImage
+            src={product.image_url}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
           {product.store?.category && (
             <Badge
               variant="secondary"
