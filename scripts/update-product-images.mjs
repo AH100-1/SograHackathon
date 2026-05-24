@@ -79,12 +79,32 @@ function hashUuid(uuid) {
   return Math.abs(h);
 }
 
+const FOOD_KEYWORDS_RE = /떡|한과|약과|강정|김치|반찬|꿀|차|빵|국수|만두|김밥|호두|밤|꽃|특산|젓갈|건어물|장아찌|곡물|채소|과일|한식|분식|정육|한우|수산|공예|화훼|차림/;
+
+function cleanProductName(name) {
+  let s = String(name || "").trim();
+  s = s.replace(/\b(선물\s*세트|선물\s*박스|시그니처|패키지|박스|모듬|컬렉션|기프트|세트|콤보|식권|보따리|모음)\b/g, "");
+  s = s.replace(/\s+/g, " ").trim();
+  const words = s.split(/\s+/);
+  if (words.length >= 2 && !FOOD_KEYWORDS_RE.test(words[0])) {
+    s = words.slice(1).join(" ").trim();
+  }
+  return s;
+}
+
 function getQuery(product) {
   const name = product.name || "";
+  // 1) 키워드 명시 매핑 우선
   for (const { kw, q } of KEYWORD_MAP) {
     if (kw.some((k) => name.includes(k))) return q;
   }
-  return CATEGORY_MAP[product.store?.category] || CATEGORY_MAP["기타"];
+  // 2) 상품 이름 정제 + 카테고리 보강
+  const cleaned = cleanProductName(name);
+  const category = product.store?.category;
+  if (cleaned.length >= 2) {
+    return cleaned + (category ? ` ${category}` : " 한국");
+  }
+  return CATEGORY_MAP[category] || CATEGORY_MAP["기타"];
 }
 
 function normalize(url) {
@@ -100,7 +120,8 @@ function normalize(url) {
 const cache = new Map();
 async function naverSearch(query) {
   if (cache.has(query)) return cache.get(query);
-  const url = `https://openapi.naver.com/v1/search/image.json?query=${encodeURIComponent(query)}&display=30&sort=sim`;
+  // filter=large 큰 사진 우선
+  const url = `https://openapi.naver.com/v1/search/image.json?query=${encodeURIComponent(query)}&display=30&sort=sim&filter=large`;
   const res = await fetch(url, {
     headers: {
       "X-Naver-Client-Id": NAVER_ID,
