@@ -225,7 +225,7 @@ export default async function HomePage() {
               올 가을, 한 상 가득한 마음을 전해보세요.
             </h2>
             <p className="mt-4 max-w-xl text-white/90 text-sm md:text-base">
-              생일·명절·감사 인사까지. 받는 사람의 자리만 알려주시면 꿈돌이가 한 상
+              생일·명절·감사 인사까지. 받는 사람의 취향만 알려주시면 꿈돌이가 한 상
               세 가지를 차려드립니다.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -268,7 +268,7 @@ export default async function HomePage() {
 const features = [
   {
     title: "꿈돌이가 차려주는 한 상",
-    desc: "예산·받는 분·자리만 알려주세요. 꿈돌이가 시장 가게를 조합해 세 가지 차림을 골라드립니다.",
+    desc: "예산·받는 분·취향만 알려주세요. 꿈돌이가 시장 가게를 조합해 세 가지 차림을 골라드립니다.",
     icon: Sparkles,
   },
   {

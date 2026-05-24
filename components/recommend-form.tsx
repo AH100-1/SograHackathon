@@ -204,7 +204,7 @@ export default function RecommendForm() {
               </Select>
             </div>
             <div>
-              <Label className="text-sm font-bold text-bark">어떤 자리인가요</Label>
+              <Label className="text-sm font-bold text-bark">어떤 취향인가요</Label>
               <Select value={occasion} onValueChange={(v) => v && setOccasion(v)}>
                 <SelectTrigger className="mt-2 rounded-lg">
                   <SelectValue />
