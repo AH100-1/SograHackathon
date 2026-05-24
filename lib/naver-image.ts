@@ -105,9 +105,16 @@ export async function fetchNaverImage(
       },
     );
     if (!res.ok) return null;
-    const json = (await res.json()) as { items?: { link: string }[] };
+    const json = (await res.json()) as {
+      items?: { link: string; thumbnail: string }[];
+    };
     const items = json.items || [];
-    // 첫 https 변환 가능한 URL 반환
+    // thumbnail (search.pstatic.net) 우선 — hotlink 허용 + https
+    // fallback: 원본 link (referer 차단 위험)
+    for (const item of items) {
+      const thumb = normalize(item.thumbnail);
+      if (thumb) return thumb;
+    }
     for (const item of items) {
       const url = normalize(item.link);
       if (url) return url;

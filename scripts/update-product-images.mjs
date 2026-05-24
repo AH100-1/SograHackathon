@@ -113,8 +113,9 @@ async function naverSearch(query) {
     return [];
   }
   const json = await res.json();
+  // thumbnail (search.pstatic.net) 우선 — hotlink 허용 + https
   const items = (json.items || [])
-    .map((it) => normalize(it.link))
+    .map((it) => normalize(it.thumbnail) || normalize(it.link))
     .filter(Boolean);
   cache.set(query, items);
   return items;
