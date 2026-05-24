@@ -1,7 +1,7 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
 const MAX_ATTEMPTS = 5;
-const LOCK_SECONDS = 10;
+const LOCK_SECONDS = 15 * 60; // 15분
 
 /**
  * 로그인 시도 횟수 추적. 5회 실패 시 15분 잠금.

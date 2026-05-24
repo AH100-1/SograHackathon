@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>장터한상 — 막차탑니다 · 경제 트랙 발표</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --maple: #c0392b;
+    --maple-dark: #7e1f1f;
+    --persimmon: #e67e22;
+    --mustard: #d4a017;
+    --cream: #fdf6ec;
+    --bark: #3a2e2a;
+    --bark-soft: #5a4a44;
+    --paper: #fffbf4;
+    --border: rgba(192,57,43,0.15);
+    --muted: #888073;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    background: var(--paper);
+    color: var(--bark);
+    line-height: 1.55;
+    overflow: hidden;
+  }
+
+  #deck {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 60px 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--paper);
+    transition: transform .35s ease, opacity .25s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .slide.active {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .slide.prev { transform: translateX(-100%); opacity: 0; }
+
+  h1 {
+    font-size: 72px; font-weight: 900;
+    letter-spacing: -0.03em; line-height: 1.05;
+  }
+  h2 {
+    font-size: 46px; font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1.2;
+  }
+  h3 { font-size: 22px; font-weight: 700; color: var(--maple); }
+  p { font-size: 18px; }
+  .lead {
+    font-size: 24px; color: var(--bark-soft);
+    max-width: 1000px; line-height: 1.5;
+  }
+  .kicker {
+    font-size: 13px; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--persimmon); margin-bottom: 16px;
+  }
+  .time-badge { display: none; }
+  .maple-text { color: var(--maple); }
+  .gradient-text {
+    background: linear-gradient(90deg, var(--maple), var(--persimmon));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed; bottom: 24px; right: 32px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 100;
+    background: rgba(255,251,244,.9);
+    backdrop-filter: blur(8px);
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(192,57,43,.08);
+  }
+  .nav button {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--cream); color: var(--bark);
+    font-size: 16px; cursor: pointer;
+    transition: background .15s;
+  }
+  .nav button:hover { background: var(--maple); color: white; }
+  .nav .count {
+    font-size: 13px; font-weight: 600;
+    color: var(--bark-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .hint {
+    position: fixed; bottom: 24px; left: 32px;
+    font-size: 11px; color: var(--bark-soft); opacity: 0.6;
+  }
+
+  /* Presenter notes */
+  #notes {
+    position: fixed;
+    bottom: 80px; left: 32px;
+    width: 380px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: rgba(58,46,42,.96);
+    color: #fff;
+    padding: 18px 20px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    display: none;
+    z-index: 99;
+  }
+  #notes.show { display: block; }
+  #notes h4 {
+    font-size: 11px;
+    color: var(--persimmon);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  #notes p { font-size: 13px; margin-bottom: 6px; }
+
+  /* Leaves */
+  .leaf {
+    position: absolute;
+    opacity: 0.07;
+    pointer-events: none;
+    color: var(--maple);
+  }
+
+  /* Grids & cards */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px 26px;
+    box-shadow: 0 4px 14px rgba(192,57,43,.05);
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(192,57,43,.08);
+    color: var(--maple);
+    margin-right: 8px; margin-bottom: 6px;
+  }
+
+  /* Cover */
+  .slide-cover {
+    background:
+      radial-gradient(900px 600px at 80% 20%, rgba(230,126,34,.14), transparent 60%),
+      radial-gradient(800px 600px at 10% 80%, rgba(192,57,43,.12), transparent 60%),
+      var(--paper);
+  }
+  .cover-team {
+    display: flex; gap: 12px; align-items: center;
+    margin-top: 28px; flex-wrap: wrap;
+  }
+  .cover-team .badge {
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 14px; font-weight: 600;
+  }
+
+  /* Slide 3 — Big Idea */
+  .big-idea {
+    display: flex; align-items: center; justify-content: center;
+    gap: 40px; margin: 40px 0;
+  }
+  .big-idea .ico {
+    font-size: 120px;
+    line-height: 1;
+  }
+  .big-idea .eq {
+    font-size: 80px; font-weight: 800; color: var(--maple);
+  }
+
+  /* Data slides — bar charts */
+  .bar-row {
+    margin-top: 18px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 22px;
+  }
+  .bar-row .label {
+    display: flex; justify-content: space-between;
+    align-items: baseline; margin-bottom: 10px;
+  }
+  .bar-row .label .name { font-size: 15px; font-weight: 700; }
+  .bar-row .label .num { font-size: 26px; font-weight: 900; color: var(--maple); }
+  .bar-row .bar {
+    height: 16px; background: var(--cream); border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar-row .bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--maple), var(--persimmon));
+    border-radius: 999px;
+    transition: width .8s ease;
+  }
+  .bar-row .sub {
+    font-size: 12px; color: var(--bark-soft); margin-top: 6px;
+  }
+
+  /* Donut for market share */
+  .donut-wrap { display: flex; gap: 50px; align-items: center; margin-top: 30px; }
+  .donut {
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: conic-gradient(
+      var(--maple) 0deg 252deg,
+      var(--cream) 252deg 360deg
+    );
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .donut::after {
+    content: "";
+    position: absolute;
+    inset: 30px;
+    background: var(--paper);
+    border-radius: 50%;
+  }
+  .donut .center {
+    position: relative; z-index: 1;
+    text-align: center;
+  }
+  .donut .center .pct { font-size: 38px; font-weight: 900; color: var(--maple); }
+  .donut .center .lbl { font-size: 11px; color: var(--bark-soft); }
+  .donut-legend { flex: 1; }
+  .donut-legend .item {
+    display: flex; gap: 10px; align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .donut-legend .item:last-child { border: none; }
+  .donut-legend .item .dot {
+    width: 12px; height: 12px; border-radius: 3px;
+    background: var(--maple);
+  }
+  .donut-legend .item.gray .dot { background: var(--cream); border: 1px solid var(--border); }
+  .donut-legend .item .text { flex: 1; font-size: 15px; }
+  .donut-legend .item .pct { font-size: 18px; font-weight: 800; }
+
+  /* Two paths */
+  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 36px; }
+  .path {
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    background: white;
+  }
+  .path.bad { opacity: 0.55; }
+  .path.good {
+    border-color: var(--maple);
+    background: linear-gradient(135deg, rgba(192,57,43,.05), rgba(230,126,34,.05));
+  }
+  .path .ico { font-size: 48px; margin-bottom: 14px; }
+  .path h3 { font-size: 24px; margin-bottom: 10px; }
+  .path p { font-size: 15px; color: var(--bark-soft); }
+  .path.bad h3 { color: var(--bark-soft); }
+
+  /* Solution flow */
+  .sol-flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; margin: 40px 0;
+  }
+  .sol-flow .step {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px 26px;
+    text-align: center;
+    min-width: 200px;
+  }
+  .sol-flow .step.center {
+    background: linear-gradient(135deg, var(--maple), var(--persimmon));
+    color: white;
+    border: none;
+  }
+  .sol-flow .step .ico { font-size: 40px; margin-bottom: 10px; }
+  .sol-flow .step .ttl { font-size: 18px; font-weight: 800; }
+  .sol-flow .step .sub { font-size: 12px; color: var(--bark-soft); margin-top: 4px; }
+  .sol-flow .step.center .sub { color: rgba(255,255,255,.8); }
+  .sol-flow .arrow { font-size: 32px; color: var(--maple); font-weight: 700; }
+
+  /* Value cards */
+  .value-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px 28px;
+    text-align: center;
+  }
+  .value-card .num {
+    font-size: 14px; font-weight: 800; color: var(--persimmon);
+    letter-spacing: 0.1em;
+  }
+  .value-card .ico { font-size: 56px; margin: 12px 0; }
+  .value-card h3 { font-size: 20px; margin-bottom: 10px; color: var(--bark); }
+  .value-card p { font-size: 15px; color: var(--bark-soft); }
+
+  /* System flow */
+  .sys-flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .sys-step {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .sys-step .badge {
+    display: inline-flex;
+    width: 28px; height: 28px;
+    background: var(--maple); color: white;
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .sys-step h4 { font-size: 16px; margin-bottom: 4px; }
+  .sys-step p { font-size: 12px; color: var(--bark-soft); }
+
+  /* Security */
+  .sec-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .sec-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--maple);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .sec-item .n { font-size: 11px; font-weight: 700; color: var(--persimmon); }
+  .sec-item .t { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .sec-item .d { font-size: 11px; color: var(--bark-soft); margin-top: 2px; }
+
+  /* 3-Zone */
+  .zone-grid {
+    display: grid;
+    grid-template-columns: 1fr 30px 1fr 30px 1fr;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 28px;
+  }
+  .zone-arrow {
+    align-self: center; text-align: center;
+    color: var(--maple); font-size: 30px; font-weight: 800;
+  }
+  .zone-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--maple);
+    border-radius: 16px;
+    padding: 22px 20px;
+    display: flex; flex-direction: column;
+  }
+  .zone-card.middle { border-top-color: var(--persimmon); }
+  .zone-card.back { border-top-color: var(--mustard); }
+  .zone-card .ico { font-size: 32px; margin-bottom: 6px; }
+  .zone-card h3 {
+    font-size: 18px; color: var(--bark);
+    margin-bottom: 2px;
+  }
+  .zone-card .where {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; color: var(--bark-soft);
+    margin-bottom: 12px;
+  }
+  .zone-card ul { list-style: none; }
+  .zone-card li {
+    font-size: 13px; padding: 5px 0;
+    display: flex; gap: 6px; align-items: baseline;
+  }
+  .zone-card li::before {
+    content: "▸"; color: var(--maple);
+    font-weight: 700; font-size: 10px;
+  }
+  .zone-card.middle li::before { color: var(--persimmon); }
+  .zone-card.back li::before { color: var(--mustard); }
+
+  /* 보안 7종 매트릭스 (OWASP + 공격/방어) */
+  .sec-matrix {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .sec-row {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+  }
+  .sec-row .top {
+    display: flex; align-items: center;
+    gap: 8px; margin-bottom: 8px;
+  }
+  .sec-row .top .name {
+    font-size: 15px; font-weight: 800; color: var(--bark);
+    flex: 1;
+  }
+  .owasp-tag {
+    font-size: 10px; font-weight: 800;
+    padding: 2px 7px; border-radius: 4px;
+    background: rgba(192,57,43,.1);
+    color: var(--maple);
+    letter-spacing: 0.04em;
+  }
+  .sec-row .attack {
+    font-size: 12px; color: var(--bark-soft);
+    padding: 4px 0;
+  }
+  .sec-row .attack b { color: var(--maple); font-weight: 700; }
+  .sec-row .defense {
+    font-size: 12px; color: var(--bark);
+    padding: 4px 0;
+  }
+  .sec-row .defense b { color: var(--persimmon); font-weight: 700; }
+  .sec-row .codepath {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; color: var(--bark-soft);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+    opacity: 0.85;
+  }
+
+  /* Before/After 공격 시나리오 */
+  .ba-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+  }
+  .ba-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .ba-card .ba-head {
+    background: linear-gradient(135deg, var(--bark), var(--bark-soft));
+    color: white;
+    padding: 12px 18px;
+  }
+  .ba-card .ba-head .label {
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 0.1em; opacity: 0.7;
+    text-transform: uppercase;
+  }
+  .ba-card .ba-head .name {
+    font-size: 16px; font-weight: 800;
+  }
+  .ba-card .ba-head .tag {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+    background: rgba(255,255,255,.18);
+    margin-left: 6px;
+  }
+  .ba-row {
+    padding: 12px 18px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ba-row .ba-icon {
+    font-size: 20px; flex-shrink: 0;
+    width: 32px; text-align: center;
+  }
+  .ba-row .ba-content {
+    flex: 1; font-size: 13px; line-height: 1.55;
+  }
+  .ba-row .ba-content .title {
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+  }
+  .ba-row.before { background: rgba(192,57,43,.05); }
+  .ba-row.before .ba-content .title { color: var(--maple); }
+  .ba-row.after { background: rgba(212,160,23,.08); }
+  .ba-row.after .ba-content .title { color: #846800; }
+  .ba-row .ba-content b { color: var(--bark); }
+  .ba-row.before .ba-content code {
+    background: rgba(192,57,43,.1);
+    padding: 1px 5px; border-radius: 3px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--maple-dark);
+  }
+
+  /* Roles */
+  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
+  .role-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+  }
+  .role-card .avatar {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--maple), var(--persimmon));
+    color: white;
+    font-size: 36px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .role-card h3 { font-size: 24px; color: var(--bark); }
+  .role-card .role { font-size: 12px; color: var(--persimmon); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .role-card p { font-size: 15px; color: var(--bark-soft); margin-top: 16px; }
+
+  /* Ending */
+  .ending {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; height: 100%;
+  }
+  .ending h1 { font-size: 84px; line-height: 1.05; }
+  .ending p { margin-top: 22px; font-size: 24px; color: var(--bark-soft); }
+
+  @media print {
+    body { overflow: visible; }
+    #deck { height: auto; overflow: visible; }
+    .slide {
+      position: relative; transform: none; opacity: 1;
+      page-break-after: always; height: 100vh;
+    }
+    .nav, .hint, #notes { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- 1. COVER -->
+  <section class="slide slide-cover active" data-notes="(슬라이드만 띄움 — 잠시 호흡)">
+    <span class="time-badge">0:00 · 5초</span>
+    <svg class="leaf" style="top: 8%; right: 8%; width: 320px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9 8H3l4.5 3.5L5.5 18 12 14l6.5 4-2-6.5L21 8h-6z"/></svg>
+    <svg class="leaf" style="bottom: 8%; left: 6%; width: 200px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9 8H3l4.5 3.5L5.5 18 12 14l6.5 4-2-6.5L21 8h-6z"/></svg>
+
+    <div class="kicker">경제 트랙 · 대전·충청권 로컬마켓 활성화</div>
+    <h1>장터<span class="maple-text">한상</span></h1>
+    <p class="lead" style="margin-top: 26px; font-size: 28px;">
+      예산만 알려주세요.<br>
+      <b class="gradient-text">꿈돌이가 대전 전통시장 한 상</b>을 차려드립니다.
+    </p>
+    <div class="cover-team">
+      <span class="badge">팀 막차탑니다</span>
+      <span class="badge">박상우 · 임찬혁</span>
+    </div>
+  </section>
+
+  <!-- 2. INTRO -->
+  <section class="slide" data-notes="안녕하세요. 막차탑니다 조의 박상우, 임찬혁입니다. ▎ 저희는 경제 트랙에서 '대전·충청권 로컬마켓 활성화 방안'을 주제로 발표드립니다.">
+    <span class="time-badge">0:05 · 20초</span>
+    <div class="kicker">팀 인사</div>
+    <h2>안녕하세요.<br><span class="maple-text">막차탑니다</span> 조입니다.</h2>
+    <p class="lead" style="margin-top: 28px;">
+      박상우 · 임찬혁<br>
+      <span style="font-size: 18px;">경제 트랙 · <b>대전·충청권 로컬마켓 활성화 방안</b></span>
+    </p>
+  </section>
+
+  <!-- 3. BIG IDEA -->
+  <section class="slide" data-notes="요즘 스타트업들은 시장 점유율 한 자리를 차지하기 위해 치열하게 싸웁니다. ▎ 그런데 이 싸움, 사실 스타트업만의 이야기가 아닙니다. ▎ 전통시장의 사장님 한 분 한 분도, 곧 하나의 기업입니다. ▎ 다만 본인이 사장이라는 사실, 그리고 점유율 싸움 한복판에 서 있다는 사실을 모르고 계실 뿐이죠.">
+    <span class="time-badge">0:25 · 30초</span>
+    <div class="kicker">빅 아이디어</div>
+    <h2>전통시장 사장님 한 분도<br><span class="maple-text">하나의 기업입니다.</span></h2>
+
+    <div class="big-idea">
+      <div class="ico">🏪</div>
+      <div class="eq">=</div>
+      <div class="ico">🚀</div>
+    </div>
+
+    <p class="lead" style="text-align: center; margin: 0 auto;">
+      다만 본인이 사장이라는 사실,<br>
+      <b class="maple-text">점유율 싸움 한복판에 서 있다는 사실</b>을 모르고 계실 뿐.
+    </p>
+  </section>
+
+  <!-- 4. MARKET DATA -->
+  <section class="slide" data-notes="자각하지 못하면, 이 치열한 세상에서 살아남기 어렵습니다. ▎ '열심히만 하면 되는 시대'는 이미 끝났기 때문이죠. ▎ 보시는 것처럼 국내 선물하기 시장은 5조 원, 그중 카카오 한 곳이 70% 이상을 가져갑니다. ▎ 게다가 온라인 e쿠폰 시장은 매년 20% 이상 성장해서, 2023년엔 9조 8천억 원까지 커졌고요. ▎ 시장은 매년 커지는데, 그 안에 전통시장 사장님 자리는 보이지 않습니다.">
+    <span class="time-badge">0:55 · 35초</span>
+    <div class="kicker">시장 잠식 — Data</div>
+    <h2>시장은 커지는데,<br><span class="maple-text">사장님 자리는 없습니다.</span></h2>
+
+    <div class="donut-wrap">
+      <div class="donut">
+        <div class="center">
+          <div class="pct">70%+</div>
+          <div class="lbl">카카오 점유</div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="item">
+          <div class="dot"></div>
+          <div class="text">카카오 선물하기</div>
+          <div class="pct maple-text">70%+</div>
+        </div>
+        <div class="item gray">
+          <div class="dot"></div>
+          <div class="text">기타 + 전통시장</div>
+          <div class="pct" style="color: var(--bark-soft);">30%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bar-row" style="margin-top: 24px;">
+      <div class="label">
+        <span class="name">국내 온라인 e쿠폰 시장 (2023)</span>
+        <span class="num">9.8조 원</span>
+      </div>
+      <div class="bar"><div class="fill" style="width: 100%;"></div></div>
+      <div class="sub">국내 선물하기 시장 5조 원 · e쿠폰 매년 20%+ 성장</div>
+    </div>
+  </section>
+
+  <!-- 5. CHICKEN GAME -->
+  <section class="slide" data-notes="그럼 사장님들은 무얼 하고 계실까요. ▎ 안타깝게도 옆 가게와 가격을 깎아내리는 치킨게임을 벌이고 있습니다. ▎ 이건 저희 추측이 아닙니다. 중소벤처기업부 2024년 조사에 따르면 — ▎ 소상공인 경영 애로 1위가 '경쟁 심화' 61%, 3위가 '상권 쇠퇴' 33.5%입니다. ▎ 1위와 3위가 결국 같은 얘기를 합니다 — 판로가 막혀서 서로의 체력만 깎고 있는 거죠.">
+    <span class="time-badge">1:30 · 35초</span>
+    <div class="kicker">치킨게임 — 중소벤처기업부 2024</div>
+    <h2>사장님끼리 <span class="maple-text">서로의 체력</span>을<br>깎고 있습니다.</h2>
+
+    <div class="bar-row">
+      <div class="label">
+        <span class="name">소상공인 경영 애로 1위 · <b>경쟁 심화</b></span>
+        <span class="num">61%</span>
+      </div>
+      <div class="bar"><div class="fill" style="width: 61%;"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="label">
+        <span class="name">소상공인 경영 애로 3위 · <b>상권 쇠퇴</b></span>
+        <span class="num">33.5%</span>
+      </div>
+      <div class="bar"><div class="fill" style="width: 33.5%;"></div></div>
+    </div>
+
+    <p class="lead" style="margin-top: 24px; font-size: 18px;">
+      1위와 3위가 같은 얘기를 합니다 —<br>
+      <b class="maple-text">판로가 막혀서 옆 가게랑 가격을 깎는 중.</b>
+    </p>
+  </section>
+
+  <!-- 6. TWO PATHS -->
+  <section class="slide" data-notes="그렇다면 살 길은 두 가지뿐입니다. ▎ 대기업 생태계에 올라타거나, 서로 합심하거나. ▎ 그런데 카카오·쿠팡 선물하기는 대기업·프랜차이즈 중심이라 로컬 소상공인은 입점조차 불가능합니다. ▎ 결국 살 길은 — 손을 맞잡고, 한 상 위에 함께 오르는 것 뿐입니다.">
+    <span class="time-badge">2:05 · 25초</span>
+    <div class="kicker">두 갈래 길</div>
+    <h2>살 길은 두 가지뿐.</h2>
+
+    <div class="paths">
+      <div class="path bad">
+        <div class="ico">🚫</div>
+        <h3>대기업 생태계에<br>올라타기</h3>
+        <p>카카오·쿠팡 선물하기는 대기업·프랜차이즈 중심.<br>
+        <b>로컬 소상공인은 입점조차 불가능.</b></p>
+      </div>
+      <div class="path good">
+        <div class="ico">🤝</div>
+        <h3>손을 맞잡고<br>함께 오르기</h3>
+        <p>전통시장 사장님들이 한 데 모여<br>
+        <b class="maple-text">한 상 위에 함께 차려지는 길.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. SOLUTION -->
+  <section class="slide" data-notes="그래서 저희는 디지털 전환이 더딘 전통시장을 한 데 묶어, ▎ 꿈돌이가 큐레이션해주는 플랫폼, '장터한상'을 만들었습니다. ▎ 예산·받는 분·자리만 입력하시면, 꿈돌이가 시장 가게들을 조합해 세 가지 한 상을 차려드립니다.">
+    <span class="time-badge">2:30 · 25초</span>
+    <div class="kicker">Solution · 장터한상</div>
+    <h2>꿈돌이가 차려주는<br><span class="gradient-text">대전 전통시장 한 상.</span></h2>
+
+    <div class="sol-flow">
+      <div class="step">
+        <div class="ico">✍️</div>
+        <div class="ttl">입력</div>
+        <div class="sub">예산 · 받는 분 · 자리</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step center">
+        <div class="ico">🍁</div>
+        <div class="ttl">꿈돌이</div>
+        <div class="sub">시장 가게 조합 큐레이션</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="ico">🎁</div>
+        <div class="ttl">한 상 3가지</div>
+        <div class="sub">스토리 + 가격 + 가게</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. VALUE -->
+  <section class="slide" data-notes="장터한상은 세 주체 모두에게 가치를 만듭니다. ▎ 소비자는 입력 한 번으로 로컬 선물 세트를 받고, ▎ 소상공인은 막혀 있던 온라인 선물 시장에 진입하고, ▎ 지역 경제는 대전·충청 로컬 소비로 상권이 다시 살아납니다.">
+    <span class="time-badge">2:55 · 25초</span>
+    <div class="kicker">Value Proposition</div>
+    <h2>세 주체 모두에게<br>가치를 만듭니다.</h2>
+
+    <div class="grid-3" style="margin-top: 32px;">
+      <div class="value-card">
+        <div class="num">01</div>
+        <div class="ico">🛍</div>
+        <h3>소비자</h3>
+        <p>입력 한 번으로<br><b class="maple-text">로컬 선물 세트</b>를 받아요.</p>
+      </div>
+      <div class="value-card">
+        <div class="num">02</div>
+        <div class="ico">🏪</div>
+        <h3>소상공인</h3>
+        <p>막혀있던<br><b class="maple-text">온라인 선물 시장</b>에 진입.</p>
+      </div>
+      <div class="value-card">
+        <div class="num">03</div>
+        <div class="ico">🍂</div>
+        <h3>지역 경제</h3>
+        <p>대전·충청 로컬 소비로<br><b class="maple-text">상권이 다시 살아남.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. SYSTEM FLOW + DEMO -->
+  <section class="slide" data-notes="말로 설명하는 것보다, 꿈돌이가 한 상을 어떻게 차리는지 직접 보여드리겠습니다. ▎ (브라우저 전환 — 골든패스) ▎ 1. 홈에서 — '예산 3만 원, 부모님 생신으로 입력해보겠습니다.' ▎ 2. 결과 화면 — '꿈돌이가 시장 가게 상품을 조합해서 세 가지 한 상을 차려줍니다.' ▎ 3. 카드 → 담기 → 결제 — '한 상이 통째로 장바구니에 담기고, 토스로 바로 결제까지 이어집니다.' ▎ 4. (시간 남으면 관리자) — '관리자는 사용자·가게·상품·승인대기를 한눈에 보고, 셀러가 올린 상품을 검토합니다.'">
+    <span class="time-badge">3:20 · 60초</span>
+    <div class="kicker">Live Demo · 골든패스</div>
+    <h2>꿈돌이가 차리는 한 상,<br><span class="maple-text">직접 보여드리겠습니다.</span></h2>
+
+    <div class="sys-flow">
+      <div class="sys-step">
+        <div class="badge">1</div>
+        <h4>홈 입력</h4>
+        <p>"예산 3만원, 부모님 생신"</p>
+      </div>
+      <div class="sys-step">
+        <div class="badge">2</div>
+        <h4>꿈돌이 결과</h4>
+        <p>세 가지 한 상 — 스토리·가게 조합</p>
+      </div>
+      <div class="sys-step">
+        <div class="badge">3</div>
+        <h4>담기 → 결제</h4>
+        <p>한 상 통째로 장바구니 → 토스 결제</p>
+      </div>
+      <div class="sys-step">
+        <div class="badge">4</div>
+        <h4>관리자</h4>
+        <p>가게·상품·승인대기 한눈에</p>
+      </div>
+    </div>
+
+    <p style="margin-top: 30px; text-align: center; font-size: 18px; color: var(--bark-soft);">
+      ▶ <b class="maple-text">sogra-hackathon.vercel.app</b> 으로 전환
+    </p>
+  </section>
+
+  <!-- 10A. 3-ZONE -->
+  <section class="slide" data-notes="기능만 있다고 끝이 아닙니다. 운영에 그대로 올릴 수 있는 수준으로 보안을 설계했습니다. ▎ 모든 요청은 입구 → 중간 → 최후방, 3겹 검문을 통과해야 합니다. ▎ 입구는 미들웨어가 CSRF 토큰과 BruteForce 잠금을 걸고, ▎ 중간은 API 라우트가 권한·입력 검증·SSRF·업로드를 검증하고, ▎ 최후방은 Supabase RLS가 본인 데이터만 보이게 막습니다.">
+    <span class="time-badge">4:20 · 20초</span>
+    <div class="kicker">Production Ready · 3-Zone Defense</div>
+    <h2>모든 요청은 <span class="maple-text">3겹 검문</span>을 통과합니다.</h2>
+
+    <div class="zone-grid">
+      <div class="zone-card">
+        <div class="ico">🚪</div>
+        <h3>입구</h3>
+        <div class="where">middleware.ts</div>
+        <ul>
+          <li>CSRF Double-Submit Cookie</li>
+          <li>BruteForce 5회 / 15분 잠금</li>
+          <li>JWT 세션 자동 갱신</li>
+        </ul>
+      </div>
+      <div class="zone-arrow">→</div>
+      <div class="zone-card middle">
+        <div class="ico">🛂</div>
+        <h3>중간</h3>
+        <div class="where">app/api/**/route.ts</div>
+        <ul>
+          <li>RBAC requireRole()</li>
+          <li>Zod 입력값 검증</li>
+          <li>XSS sanitize (regex)</li>
+          <li>SSRF 7단계 (DNS rebinding 포함)</li>
+          <li>Upload 매직넘버 검증</li>
+        </ul>
+      </div>
+      <div class="zone-arrow">→</div>
+      <div class="zone-card back">
+        <div class="ico">🏰</div>
+        <h3>최후방</h3>
+        <div class="where">Supabase Postgres</div>
+        <ul>
+          <li>RLS 정책 (모든 테이블)</li>
+          <li>ORM Prepared Statement</li>
+          <li>bcrypt 비번 단방향 해시</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 26px; font-size: 14px; color: var(--bark-soft);">
+      <b style="color: var(--maple);">OWASP Top 10</b> 6개 카테고리 · 9개 공격 시나리오 · 11개 코드 위치 매핑
+    </p>
+  </section>
+
+  <!-- 10B. 보안 7종 + OWASP -->
+  <section class="slide" data-notes="각 보안 모듈이 어떤 공격을 어떻게 막는지 한 줄로 정리했습니다. ▎ XSS·CSRF·SQL Injection 같은 OWASP Top 10 위협을 모두 커버합니다. ▎ 코드 위치는 각 카드 하단에 작게 표시했습니다.">
+    <span class="time-badge">4:40 · 30초</span>
+    <div class="kicker">보안 7종 · OWASP Top 10 매핑</div>
+    <h2>위협마다 <span class="maple-text">전용 방어 라인</span>이 있습니다.</h2>
+
+    <div class="sec-matrix">
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">① CSRF Token</span>
+          <span class="owasp-tag">A01 · A08</span>
+        </div>
+        <div class="attack"><b>공격:</b> 다른 사이트가 사용자 쿠키로 우리 API 무단 호출</div>
+        <div class="defense"><b>방어:</b> Double-Submit Cookie + Constant-time 비교</div>
+        <div class="codepath">lib/security/csrf.ts · middleware.ts · 모든 POST API</div>
+      </div>
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">② XSS Sanitize</span>
+          <span class="owasp-tag">A03</span>
+        </div>
+        <div class="attack"><b>공격:</b> 리뷰에 &lt;script&gt; 심어두면 다음 방문자 쿠키 탈취</div>
+        <div class="defense"><b>방어:</b> 위험 태그·이벤트·javascript: 스킴 regex 제거</div>
+        <div class="codepath">lib/security/sanitize.ts · /api/reviews · /api/products</div>
+      </div>
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">③ RBAC</span>
+          <span class="owasp-tag">A01</span>
+        </div>
+        <div class="attack"><b>공격:</b> 일반 사용자가 URL로 /admin 직접 진입</div>
+        <div class="defense"><b>방어:</b> middleware + requireRole + RLS, 3겹</div>
+        <div class="codepath">lib/security/rbac.ts · /api/admin/** · middleware</div>
+      </div>
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">④ BruteForce 잠금</span>
+          <span class="owasp-tag">A07</span>
+        </div>
+        <div class="attack"><b>공격:</b> 봇이 초당 1000번 비번 추측</div>
+        <div class="defense"><b>방어:</b> 5회 실패 → 15분 잠금 + Retry-After 헤더</div>
+        <div class="codepath">lib/security/bruteforce.ts · public.login_attempts</div>
+      </div>
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">⑤ SSRF</span>
+          <span class="owasp-tag">A10</span>
+        </div>
+        <div class="attack"><b>공격:</b> image_url에 169.254.169.254 → AWS 토큰 탈취</div>
+        <div class="defense"><b>방어:</b> 7단계 검증 + DNS rebinding + 리다이렉트 hop</div>
+        <div class="codepath">lib/security/ssrf.ts · /api/products</div>
+      </div>
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">⑥ 파일 업로드</span>
+          <span class="owasp-tag">A05</span>
+        </div>
+        <div class="attack"><b>공격:</b> malware.php를 cute.jpg로 위장 업로드</div>
+        <div class="defense"><b>방어:</b> MIME + 확장자 + 매직넘버(첫 바이트) 3중 검증</div>
+        <div class="codepath">lib/security/upload.ts · /api/upload</div>
+      </div>
+
+      <div class="sec-row">
+        <div class="top">
+          <span class="name">⑦ RLS · SQL Injection</span>
+          <span class="owasp-tag">A01 · A03</span>
+        </div>
+        <div class="attack"><b>공격:</b> 'OR 1=1-- 로그인 우회 + 남의 주문 훔쳐보기</div>
+        <div class="defense"><b>방어:</b> Supabase ORM Prepared Stmt + 모든 테이블 RLS</div>
+        <div class="codepath">supabase/migrations/0001_init.sql · 0002_fix_rls_recursion.sql</div>
+      </div>
+
+      <div class="sec-row" style="background: rgba(212,160,23,.06); border-color: var(--mustard);">
+        <div class="top">
+          <span class="name">+ 결제 금액 검증</span>
+          <span class="owasp-tag" style="background: rgba(212,160,23,.18); color: #846800;">Custom</span>
+        </div>
+        <div class="attack"><b>공격:</b> 클라이언트가 결제 금액 조작해서 1만원짜리를 100원으로 결제</div>
+        <div class="defense"><b>방어:</b> 서버가 장바구니 재계산 → 일치 시만 토스 승인 요청</div>
+        <div class="codepath">/api/orders — 서버측 재계산 게이트</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 11. ROLES -->
+  <section class="slide" data-notes="24시간을 둘이 어떻게 나눴는지 짧게 말씀드리면 — ▎ 박상우가 개발 — 프론트·백·DB·결제 연동까지, ▎ 임찬혁이 기획서·PPT·발표 스토리텔링과 시장 데이터 리서치를 맡았습니다.">
+    <span class="time-badge">5:10 · 15초</span>
+    <div class="kicker">Team · 24시간 역할 분담</div>
+    <h2>둘이 어떻게<br>나눴는가</h2>
+
+    <div class="roles">
+      <div class="role-card">
+        <div class="avatar">박</div>
+        <h3>박상우</h3>
+        <div class="role">개발</div>
+        <p>프론트 · 백엔드 · DB · 결제 연동</p>
+      </div>
+      <div class="role-card">
+        <div class="avatar">임</div>
+        <h3>임찬혁</h3>
+        <div class="role">기획 · 발표</div>
+        <p>기획서 · PPT · 스토리텔링 · 시장 리서치</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. ENDING -->
+  <section class="slide slide-cover" data-notes="정성은 가게마다, 시장은 한 상 위로. ▎ 꿈돌이가 차려주는 대전 전통시장 한 상, 장터한상이었습니다. ▎ 감사합니다.">
+    <span class="time-badge">5:25 · 10초</span>
+    <svg class="leaf" style="top: 10%; left: 8%; width: 220px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9 8H3l4.5 3.5L5.5 18 12 14l6.5 4-2-6.5L21 8h-6z"/></svg>
+    <svg class="leaf" style="bottom: 10%; right: 10%; width: 320px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9 8H3l4.5 3.5L5.5 18 12 14l6.5 4-2-6.5L21 8h-6z"/></svg>
+
+    <div class="ending">
+      <h1 class="gradient-text">정성은 가게마다,<br>시장은 한 상 위로.</h1>
+      <p>꿈돌이가 차려주는 대전 전통시장 한 상,<br><b style="color: var(--maple);">장터한상</b>이었습니다.</p>
+      <p style="margin-top: 60px; font-size: 30px; font-weight: 800; color: var(--bark);">감사합니다.</p>
+      <div class="cover-team" style="margin-top: 30px; justify-content: center;">
+        <span class="badge">막차탑니다</span>
+        <span class="badge">박상우 · 임찬혁</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Notes -->
+<div id="notes">
+  <h4>발표 노트</h4>
+  <div id="notes-body"></div>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <button id="prev" aria-label="이전">←</button>
+  <span class="count"><span id="cur">1</span> / <span id="tot">13</span></span>
+  <button id="next" aria-label="다음">→</button>
+</div>
+
+<div class="hint">←/→ Space 이동 · F 전체화면 · N 발표노트 토글 · P 인쇄</div>
+
+<script>
+  const slides = document.querySelectorAll(".slide");
+  const total = slides.length;
+  let idx = 0;
+  let notesShown = false;
+  const cur = document.getElementById("cur");
+  const tot = document.getElementById("tot");
+  const notesEl = document.getElementById("notes");
+  const notesBody = document.getElementById("notes-body");
+  tot.textContent = total;
+
+  function show(n) {
+    idx = (n + total) % total;
+    slides.forEach((s, i) => {
+      s.classList.remove("active", "prev");
+      if (i === idx) s.classList.add("active");
+      else if (i < idx) s.classList.add("prev");
+    });
+    cur.textContent = idx + 1;
+    const note = slides[idx].dataset.notes || "";
+    notesBody.innerHTML = note.split("▎").filter(Boolean).map((p) => `<p>${p.trim()}</p>`).join("");
+  }
+
+  document.getElementById("next").addEventListener("click", () => show(idx + 1));
+  document.getElementById("prev").addEventListener("click", () => show(idx - 1));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+      e.preventDefault(); show(idx + 1);
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault(); show(idx - 1);
+    } else if (e.key === "Home") {
+      show(0);
+    } else if (e.key === "End") {
+      show(total - 1);
+    } else if (e.key === "f" || e.key === "F") {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    } else if (e.key === "n" || e.key === "N") {
+      notesShown = !notesShown;
+      notesEl.classList.toggle("show", notesShown);
+    } else if (e.key === "p" || e.key === "P") {
+      window.print();
+    }
+  });
+
+  show(0);
+</script>
+
+</body>
+</html>
